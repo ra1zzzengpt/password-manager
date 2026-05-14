@@ -8,10 +8,12 @@ pub fn menu_print() {
         println!("|                                    _|    ");
         println!("[1] Generate new password");
         println!("[2] Exit");
-        match console::read_i32("Enter your choice: ") {
+        match console::read::<u8>("Enter your choice: ") {
             1=> {
-                println!("{}", generate::generate_password(
-                    console::read_i32("Enter a length: ") as usize));
+                println!("{} --- {}",console::read::<String>("Service name: "),
+                         generate::generate_password(
+                             console::read::<usize>(
+                             "Enter a length: ")));
             }
             2=> return,
             _=> {
