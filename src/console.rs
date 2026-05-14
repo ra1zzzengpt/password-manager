@@ -1,14 +1,16 @@
-pub fn read_i32(prompt : &str) -> i32 {
+use std::io::Write;
+pub fn read<T: std::str::FromStr>(prompt: &str) -> T {
     loop {
         let mut input = String::new();
-        println!("{}", prompt);
+        print!("{}", prompt);
+        let _ = std::io::stdout().flush();
         if std::io::stdin().read_line(&mut input).is_err() {
-            println!("Error reading input");
+            eprintln!("Read error");
             continue;
         }
-        match input.trim().parse::<i32>() {
-            Ok(num) => return num,
-            Err(_) => eprintln!("Error reading input"),
+        match input.trim().parse::<T>() {
+            Ok(v) => return v,
+            Err(_) => eprintln!("Invalid input, try again"),
         }
     }
 }
