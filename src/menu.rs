@@ -1,23 +1,26 @@
 use crate::console;
 use crate::generate;
+use crate::models;
 
 pub fn menu_print() {
+    println!("_____ _ _ _ ____  _____");
+    println!("|  _  | | | |    \\|     |");
+    println!("|   __| | | |  |  | | | |");
+    println!("|__|  |_____|____/|_|_|_|");
     loop {
-        println!(" _  _  _ _   _  _ _|   _ _  _  _  _  _  _  _");
-        println!(r"|_)(_|_\_\VV(_)| (_|  | | |(_|| |(_|(_|(/_| ");
-        println!("|                                    _|    ");
-        println!("[1] Generate new password");
-        println!("[2] Exit");
-        match console::read::<u8>("Enter your choice: ") {
-            1=> {
-                println!("{} --- {}",console::read::<String>("Service name: "),
-                         generate::generate_password(
-                             console::read::<usize>(
-                             "Enter a length: ")));
+        match console::read::<String>("> ").as_str() {
+            "/gen" => {
+                let service = models::Service {
+                    service_name:console::read::<String>("Service name: "),
+                    login:console::read::<String>("Login: "),
+                    password:generate::generate_password(console::read::<usize>("Password len: "))
+                };
+                println!("{}",service);
             }
-            2=> return,
+            "/help" => {println!("/gen - generate new password\n/help - display this help\n/exit - exit");}
+            "/exit" => return,
             _=> {
-                println!("Invalid choice");
+                println!("Unknown command. (use /help to see available commands)");
                 continue;
             }
         }
