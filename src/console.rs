@@ -1,16 +1,26 @@
 use std::io::Write;
+
 pub fn read<T: std::str::FromStr>(prompt: &str) -> T {
     loop {
         let mut input = String::new();
         print!("{}", prompt);
         let _ = std::io::stdout().flush();
         if std::io::stdin().read_line(&mut input).is_err() {
-            eprintln!("Read error");
+            eprintln!("{}",term_ansi::red!("[ERROR]: reading input"));
             continue;
         }
         match input.trim().parse::<T>() {
             Ok(v) => return v,
-            Err(_) => eprintln!("Invalid input, try again"),
+            Err(_) => eprintln!("{}",term_ansi::red!("Invalid input, try again")),
         }
     }
+}
+
+pub fn console_clear(){
+    println!("\x1B[3J\x1B[2J\x1B[H")
+}
+
+pub fn wait_enter(){
+    println!("Press enter to continue...");
+    std::io::stdin().read_line(&mut String::new()).expect("[ERROR]: reading input");
 }
