@@ -4,7 +4,7 @@ const ALLOWED_SYMBOLS : &[u8] = b"abcdefghijklmnopqrstuvwxyz\
                              0123456789!@#$%^&*()";
 
 pub fn generate_password(length : usize) -> String {
-    let mut password : String = "".to_string();
+    let mut password : String = String::with_capacity(length);
     let mut rng = rand::thread_rng();
     for _ in 0 .. length {
         password.push(ALLOWED_SYMBOLS[rng.gen_range(0..ALLOWED_SYMBOLS.len())] as char)
