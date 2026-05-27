@@ -9,6 +9,10 @@ pub fn read<T: std::str::FromStr>(prompt: &str) -> T {
             eprintln!("{}",term_ansi::red!("[ERROR]: reading input"));
             continue;
         }
+        if input.trim().is_empty(){
+            eprintln!("{}",term_ansi::red!("[ERROR]: input can't be empty"));
+            continue;
+        }
         match input.trim().parse::<T>() {
             Ok(v) => return v,
             Err(_) => eprintln!("{}",term_ansi::red!("Invalid input, try again")),
