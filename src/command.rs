@@ -1,23 +1,18 @@
-use crate::errors::ErrorType;
-
-pub enum Command {
-    Generate,
+pub enum Command<'a> {
+    Generate(std::str::SplitWhitespace<'a>),
     Help,
     Quit,
     Unknown(String),
 }
 
-impl From<&str> for Command {
-    fn from(command: &str) -> Self {
-        match command {
-            "/h" => Command::Help,
-            "/q" => Command::Quit,
-            "/g" => Command::Generate,
+impl<'a> From<&'a str> for Command<'a> {
+    fn from(command: &'a str) -> Self {
+        let mut split = command.split_whitespace();
+        match split.next().unwrap() {
+            "/h" | "/help" => Command::Help,
+            "/q" | "/quit" | "/exit" => Command::Quit,
+            "/g" | "/gen" | "/generate" => Command::Generate(split),
             other => Command::Unknown(other.to_string()),
         }
     }
 }
-
-// fn parse_generate(base_string : String) -> Result<Command, ErrorType> {
-//
-// }
