@@ -1,45 +1,38 @@
-# Password Manager
+# PWMD — Password Manager
 
-A simple CLI-based password manager written in Rust.
+A CLI password manager written in Rust.
 
-## Current State
+## Current Version — v0.1
 
-Currently, this tool is a basic password generator that allows you to:
-- Generate random passwords of a specified length.
-- Use a simple CLI menu for interaction.
+Basic password generation with a simple command-driven interface.
+
+**Available commands:**
+
+| Command | Arguments | Description |
+|---|---|---|
+| `/gen`, `/generate`, `/g` | `<service> <login> <length>` | Generate a password and bind it to a service/login |
+| `/fg`, `/fastgen` | `<length>` | Generate a standalone password |
+| `/help`, `/h` | — | Show available commands |
+| `/quit`, `/exit`, `/q` | — | Exit |
+
+## Installation
+
+Requires [Rust](https://www.rust-lang.org/tools/install) (latest stable).
+
+```bash
+git clone https://github.com/ra1zzzengpt/password-manager.git
+cd password-manager
+cargo run
+```
 
 ## Roadmap
 
-The project is evolving into a full-featured password manager. Future features include:
-- **Vault Storage:** Securely store passwords for different websites/services.
-- **Clipboard Integration:** Automatically copy selected passwords to the clipboard.
-- **Encryption:** Keep your stored passwords safe with industry-standard encryption.
-- **Improved UI:** Enhanced console interface and potential GUI.
-
-## Prerequisites
-
-- [Rust](https://www.rust-lang.org/tools/install) (latest stable version)
-- [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
-
-## Installation & Running
-
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/password-manager.git
-    cd password-manager
-    ```
-2.  Run the application:
-    ```bash
-    cargo run
-    ```
-
-## Usage
-
-1.  Launch the application using `cargo run`.
-2.  Select `[1] Generate new password` from the menu.
-3.  Enter the desired length for your password.
-4.  The generated password will be displayed in the console.
+- **v0.2** — File storage: save generated entries to a local vault file
+- **v0.3** — Filtering & output: list by service, by login, quick lookup by name
+- **v0.4** — Sub-commands: additional utility functions
+- **v0.5** — Dump & export: portable export format for vault migration
+- **v0.6** — Encryption: protect the vault with a master password or machine binding
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+MIT — see [LICENSE.md](LICENSE.md).
