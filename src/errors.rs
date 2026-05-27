@@ -15,7 +15,7 @@ impl std::fmt::Display for ErrorType {
             ErrorType::ParseError => String::from("ParseError"),
             ErrorType::IncorrectPasswordLength => String::from("IncorrectPasswordLengthError"),
         };
-        write!(formatter, "{}",message)
+        write!(formatter, "{}", message)
     }
 }
 
