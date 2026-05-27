@@ -1,27 +1,32 @@
-# Contributing to Password Manager
+# Contributing
 
-Thank you for your interest in contributing to the Password Manager! We welcome contributions from everyone.
-
-## How to Contribute
-
-1.  **Report Bugs:** If you find a bug, please open an issue describing the problem and how to reproduce it.
-2.  **Suggest Features:** Have an idea for a new feature? Open an issue to discuss it.
-3.  **Submit Pull Requests:**
-    *   Fork the repository.
-    *   Create a new branch for your changes.
-    *   Ensure your code follows the project's style.
-    *   Run tests (if any) before submitting.
-    *   Open a pull request with a clear description of your changes.
-
-## Development Environment
-
-This project is built using Rust. You will need the latest stable version of Rust and Cargo installed.
+## Getting started
 
 ```bash
-# Check rust version
-rustc --version
+git clone https://github.com/ra1zzzengpt/password-manager.git
+cd password-manager
+cargo build
+cargo run
 ```
 
-## Code Style
+Requires Rust stable. Check your version: `rustc --version`.
 
-We follow the standard Rust coding conventions. Please run `cargo fmt` before submitting your code.
+## Before submitting
+
+- Run `cargo fmt` — code must be formatted
+- Run `cargo clippy` — no warnings allowed
+- Run `cargo build` — must compile cleanly
+
+## Pull requests
+
+- Branch off `main`, name it `feature/<what>` or `fix/<what>`
+- Keep commits focused — one logical change per commit
+- Describe what changed and why in the PR description
+
+## Reporting issues
+
+Open an issue with:
+- What you did
+- What you expected
+- What actually happened
+- Output / error message if any
