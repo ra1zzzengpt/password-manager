@@ -4,15 +4,17 @@ pub struct AppError {
 }
 
 pub enum ErrorType {
-    IteratorError,
     ParseError,
+    IncorrectNumberOfParameters,
+    IncorrectPasswordLength,
 }
 
 impl ErrorType {
     pub fn to_string(&self) -> String {
         match &self {
-            ErrorType::IteratorError => String::from("IteratorError"),
+            ErrorType::IncorrectNumberOfParameters => String::from("ParametersError"),
             ErrorType::ParseError => String::from("ParseError"),
+            ErrorType::IncorrectPasswordLength => String::from("IncorrectPasswordLengthError"),
         }
     }
 }
