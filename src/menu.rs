@@ -1,7 +1,6 @@
 use crate::console;
-use crate::generate;
-use crate::models;
 use crate::command;
+use crate::parser::parse_generate;
 
 pub fn menu_print() {
     println!("_____ _ _ _ ____  _____");
@@ -10,13 +9,11 @@ pub fn menu_print() {
     println!("|__|  |_____|____/|_|_|_|");
     loop {
         match command::Command::from(console::read::<String>("> ").as_str()) {
-            command::Command::Generate => {
-                let service = models::Service {
-                    service_name:console::read::<String>("Service name: "),
-                    login:console::read::<String>("Login: "),
-                    password:generate::generate_password(console::read::<usize>("Password len: "))
-                };
-                println!("{}",service);
+            command::Command::Generate(mut split) => {
+                match parse_generate(&mut split) {
+                    Ok(generate) => {println!("{}", generate)}
+                    Err(err) => println!("{}", err),
+                }
             }
             command::Command::Help => {print_help();}
             command::Command::Quit => return,
@@ -31,5 +28,5 @@ pub fn menu_print() {
 fn print_help() {
     println!("/help | h - display this help");
     println!("/gen | generate | g - [SERVICE NAME] [LOGIN] [PASSWORD LENGTH] - generate random password");
-    println!("/quit | q - exit");
+    println!("/quit | q | exit - exit");
 }
