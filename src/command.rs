@@ -1,6 +1,7 @@
 pub enum Command<'a> {
     Generate(std::str::SplitWhitespace<'a>),
     FastGenerate(std::str::SplitWhitespace<'a>),
+    List,
     Help,
     Quit,
     Unknown(String),
@@ -14,6 +15,7 @@ impl<'a> From<&'a str> for Command<'a> {
             "/q" | "/quit" | "/exit" => Command::Quit,
             "/g" | "/gen" | "/generate" => Command::Generate(split),
             "/fg" | "/fastgen" => Command::FastGenerate(split),
+            "/l" | "/list" => Command::List,
             other => Command::Unknown(other.to_string()),
         }
     }
