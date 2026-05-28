@@ -5,6 +5,12 @@ pub struct Container {
     pub services: Vec<Service>,
 }
 
+
+impl Default for Container {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Container {
     pub fn new() -> Container {
         Container {
@@ -23,7 +29,7 @@ impl Container {
     }
 
     pub fn load(&mut self) -> Result<(), AppError> {
-        match read_from_file(&std::path::Path::new("save.txt")) {
+        match read_from_file(std::path::Path::new("save.txt")) {
             Ok(parsed_services) => {
                 self.services = parsed_services;
             }
@@ -34,7 +40,7 @@ impl Container {
 
     pub fn save(&self) -> Result<(), AppError> {
         for service in &self.services {
-            match write_to_file(&std::path::Path::new("save.txt"), &*service.to_string()) {
+            match write_to_file(std::path::Path::new("save.txt"), &*service.to_string()) {
                 Ok(_) => continue,
                 Err(error) => return Err(error),
             }
