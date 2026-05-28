@@ -39,7 +39,7 @@ impl Container {
 
     pub fn save(&self) -> Result<(), AppError> {
         for service in &self.services {
-            match write_to_file(std::path::Path::new("save.txt"), &*service.to_string()) {
+            match write_to_file(std::path::Path::new("save.txt"), &service.to_string()) {
                 Ok(_) => continue,
                 Err(error) => return Err(error),
             }
