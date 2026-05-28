@@ -37,16 +37,15 @@ pub fn read_from_file(path: &std::path::Path) -> Result<Vec<Service>, AppError> 
     for line in reader.lines() {
         match line {
             Ok(line) => {
-                let parsed_service =
-                    match Service::parse::<String>(&mut line.split_whitespace()) {
-                        Ok(service) => service,
-                        Err(_) => {
-                            return Err(AppError::new(
-                                ErrorType::ParseError,
-                                String::from("Cannot parse service."),
-                            ));
-                        }
-                    };
+                let parsed_service = match Service::parse::<String>(&mut line.split_whitespace()) {
+                    Ok(service) => service,
+                    Err(_) => {
+                        return Err(AppError::new(
+                            ErrorType::ParseError,
+                            String::from("Cannot parse service."),
+                        ));
+                    }
+                };
                 vector.push(parsed_service);
             }
             Err(_) => {

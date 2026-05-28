@@ -5,7 +5,6 @@ pub struct Container {
     pub services: Vec<Service>,
 }
 
-
 impl Default for Container {
     fn default() -> Self {
         Self::new()
