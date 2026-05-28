@@ -7,6 +7,8 @@ pub enum ErrorType {
     ParseError,
     IncorrectNumberOfParameters,
     IncorrectPasswordLength,
+    FileOpenError,
+    FileWriteError,
 }
 impl std::fmt::Display for ErrorType {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -14,6 +16,8 @@ impl std::fmt::Display for ErrorType {
             ErrorType::IncorrectNumberOfParameters => String::from("ParametersError"),
             ErrorType::ParseError => String::from("ParseError"),
             ErrorType::IncorrectPasswordLength => String::from("IncorrectPasswordLengthError"),
+            ErrorType::FileOpenError => String::from("FileOpenError"),
+            ErrorType::FileWriteError => String::from("FileWriteError"),
         };
         write!(formatter, "{}", message)
     }
