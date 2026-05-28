@@ -1,6 +1,8 @@
 pub mod command;
 pub mod console;
+pub mod container;
 pub mod errors;
+pub mod files;
 pub mod generate;
 pub mod menu;
 pub mod models;
