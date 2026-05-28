@@ -9,7 +9,7 @@ pub fn menu_print() {
     println!("|  _  | | | |    \\|     |");
     println!("|   __| | | |  |  | | | |");
     println!("|__|  |_____|____/|_|_|_|");
-    let mut container = Container::new();
+    let mut container = Container::default();
     match container.load() {
         Ok(_) => {}
         Err(error) => {
