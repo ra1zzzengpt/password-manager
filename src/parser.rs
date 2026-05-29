@@ -1,2 +1,2 @@
-pub mod generate;
+pub mod param;
 pub mod service;
