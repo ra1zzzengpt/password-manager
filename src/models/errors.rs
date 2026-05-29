@@ -9,6 +9,7 @@ pub enum ErrorType {
     IncorrectPasswordLength,
     FileOpenError,
     FileWriteError,
+    FileCreateError,
 }
 impl std::fmt::Display for ErrorType {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -18,6 +19,7 @@ impl std::fmt::Display for ErrorType {
             ErrorType::IncorrectPasswordLength => String::from("IncorrectPasswordLengthError"),
             ErrorType::FileOpenError => String::from("FileOpenError"),
             ErrorType::FileWriteError => String::from("FileWriteError"),
+            ErrorType::FileCreateError => String::from("FileCreateError"),
         };
         write!(formatter, "{}", message)
     }
@@ -30,6 +32,7 @@ impl std::fmt::Display for AppError {
 }
 
 impl AppError {
+    #[must_use]
     pub fn new(err_type: ErrorType, message: String) -> AppError {
         AppError { err_type, message }
     }
