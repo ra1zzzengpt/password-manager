@@ -1,6 +1,10 @@
 use std::io::Write;
 
-pub fn read<T: std::str::FromStr>(prompt: &str) -> T {
+#[must_use]
+pub fn read<T>(prompt: &str) -> T
+where
+    T: std::str::FromStr,
+{
     loop {
         let mut input = String::new();
         print!("{}", prompt);
