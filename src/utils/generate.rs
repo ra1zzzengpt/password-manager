@@ -3,6 +3,7 @@ const ALLOWED_SYMBOLS: &[u8] = b"abcdefghijklmnopqrstuvwxyz\
                              ABCDEFGHIJKLMNOPQRSTUVWXYZ\
                              0123456789!@#$%^&*()";
 
+#[must_use]
 pub fn generate_password(length: usize) -> String {
     let mut password: String = String::with_capacity(length);
     let mut rng = rand::thread_rng();
