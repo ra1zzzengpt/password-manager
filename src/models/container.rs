@@ -1,3 +1,4 @@
+use crate::models::command::SubCommand;
 use crate::models::errors::AppError;
 use crate::models::service::Service;
 use crate::utils::files::{add_to_file, read_from_file, rewrite_to_file};
@@ -51,15 +52,24 @@ impl Container {
             Err(error) => Err(error),
         }
     }
-}
 
-impl std::fmt::Display for Container {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let mut result = String::new();
-        for service in &self.services {
-            result.push_str(&service.to_string());
-            result.push('\n');
+    pub fn list(&self, sub: &SubCommand) -> String {
+        let services = match sub {
+            SubCommand::ServiceSort(name) => &self
+                .services
+                .iter()
+                .filter(|service| service.name() == name)
+                .collect::<Vec<&Service>>(),
+            SubCommand::Default => &self.services.iter().collect::<Vec<&Service>>(),
+        };
+        if !services.is_empty() {
+            services
+                .iter()
+                .map(|service| service.to_string())
+                .collect::<Vec<String>>()
+                .join("\n")
+        } else {
+            String::from("No services found")
         }
-        write!(f, "{}", result)
     }
 }
