@@ -23,4 +23,8 @@ impl Service {
             password,
         }
     }
+
+    pub fn name(&self) -> &str {
+        &self.service_name
+    }
 }
