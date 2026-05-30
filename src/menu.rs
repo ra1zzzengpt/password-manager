@@ -36,10 +36,12 @@ pub fn menu_print() {
 
 fn print_help() {
     println!("/help | h - display this help");
+    println!("/add | a - [SERVICE NAME] [LOGIN] [PASSWORD] - add your service to manager");
     println!(
         "/gen | generate | g - [SERVICE NAME] [LOGIN] [PASSWORD LENGTH] - generate random password for service"
     );
     println!("/fastgen | fg - [PASSWORD LENGTH] - generate random password (DON'T SAVE)");
     println!("/list | l - list all available services");
+    println!("/save | s - save passwords to file with rewrite");
     println!("/quit | q | exit - exit");
 }
