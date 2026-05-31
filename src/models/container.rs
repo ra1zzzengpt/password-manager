@@ -20,42 +20,25 @@ impl Container {
 
     pub fn add_service(&mut self, service: &Service) -> Result<(), AppError> {
         self.services.push(service.clone());
-        Container::save_to_add(service.clone().to_string())
-    }
-
-    pub fn show(&self) {
-        for service in &self.services {
-            println!("{}", service);
-        }
+        Container::save_to_add(service.to_string())
     }
 
     pub fn load(&mut self) -> Result<(), AppError> {
-        match read_from_file(std::path::Path::new("save.txt")) {
-            Ok(parsed_services) => {
-                self.services = parsed_services;
-            }
-            Err(error) => return Err(error),
-        }
+        self.services = read_from_file(std::path::Path::new("save.txt"))?;
         Ok(())
     }
 
     pub fn save_with_rewrite(&self) -> Result<(), AppError> {
-        match rewrite_to_file(std::path::Path::new("save.txt"), &self.services) {
-            Ok(_) => Ok(()),
-            Err(error) => Err(error),
-        }
+        rewrite_to_file(std::path::Path::new("save.txt"), &self.services)
     }
 
     fn save_to_add(content: String) -> Result<(), AppError> {
-        match add_to_file(std::path::Path::new("save.txt"), content.as_str()) {
-            Ok(_) => Ok(()),
-            Err(error) => Err(error),
-        }
+        add_to_file(std::path::Path::new("save.txt"), content.as_str())
     }
 
     pub fn list(&self, sub: &SubCommand) -> String {
         let services = match sub {
-            SubCommand::ServiceSort(name) => &self
+            SubCommand::ByService(name) => &self
                 .services
                 .iter()
                 .filter(|service| service.name() == name)
