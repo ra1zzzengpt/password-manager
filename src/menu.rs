@@ -7,25 +7,22 @@ pub fn menu_print() {
     println!("|   __| | | |  |  | | | |");
     println!("|__|  |_____|____/|_|_|_|");
     let mut appcontroller = AppController::default();
-    match appcontroller.load() {
-        Ok(_) => (),
-        Err(e) => {
-            eprintln!("{}", e);
-        }
+    if let Err(e) = appcontroller.load() {
+        eprintln!("{e}");
     }
     loop {
         match appcontroller.command_runner(read::<String>("> ")) {
             CommandRunner::CommandSuccess(success) => {
-                println!("{}", success);
+                println!("{success}");
             }
             CommandRunner::CommandFailure(failure) => {
-                eprintln!("{}", failure);
+                eprintln!("{failure}");
             }
             CommandRunner::CommandHelp => {
                 print_help();
             }
             CommandRunner::UnknownCommand(command) => {
-                eprintln!("Unknown command: {}, use /help for know commands.", command);
+                eprintln!("Unknown command: {command}, use /help for know commands.");
             }
             CommandRunner::CommandExit => {
                 break;
