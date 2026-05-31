@@ -16,7 +16,7 @@ pub enum Command {
 
 pub enum SubCommand {
     Default,
-    ServiceSort(String),
+    ByService(String),
 }
 
 impl From<&str> for Command {
@@ -29,7 +29,7 @@ impl From<&str> for Command {
             "/a" | "/add" => Command::Add(parse_service::<String>(&mut split)),
             "/fg" | "/fastgen" => Command::FastGenerate(parse_param::<usize>(&mut split)),
             "/l" | "/list" => Command::List(match split.next() {
-                Some(service_name) => SubCommand::ServiceSort(service_name.to_string()),
+                Some(service_name) => SubCommand::ByService(service_name.to_string()),
                 None => SubCommand::Default,
             }),
             "/s" | "/save" => Command::SaveWithRewrite,
