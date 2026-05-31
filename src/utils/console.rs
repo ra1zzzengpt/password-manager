@@ -19,7 +19,7 @@ where
         }
         match input.trim().parse::<T>() {
             Ok(v) => return v,
-            Err(_) => eprintln!("{}", term_ansi::red!("Invalid input, try again")),
+            Err(_) => eprintln!("{}", term_ansi::red!("[ERROR]: Invalid input, try again")),
         }
     }
 }
