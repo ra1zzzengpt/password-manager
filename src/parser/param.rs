@@ -9,11 +9,10 @@ pub fn parse_param<T: std::str::FromStr>(
             String::from("Can't find password length."),
         )
     })?;
-    match parameter.parse::<T>() {
-        Ok(length) => Ok(length),
-        Err(_) => Err(AppError::new(
+    parameter.parse::<T>().map_err(|_| {
+        AppError::new(
             ErrorType::ParseError,
-            String::from("Can't parse password length in usize."),
-        )),
-    }
+            String::from("Can't parse parameter."),
+        )
+    })
 }

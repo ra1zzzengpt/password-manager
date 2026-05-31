@@ -1,8 +1,10 @@
+#[derive(Debug)]
 pub struct AppError {
     pub err_type: ErrorType,
     pub message: String,
 }
 
+#[derive(Debug)]
 pub enum ErrorType {
     ParseError,
     IncorrectNumberOfParameters,

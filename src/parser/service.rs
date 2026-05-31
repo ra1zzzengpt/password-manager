@@ -21,41 +21,42 @@ pub fn parse_service<T>(iter: &mut std::str::SplitWhitespace) -> Result<Service,
 where
     T: std::str::FromStr + PasswordSource,
 {
-    let service_name = match iter.next() {
-        Some(name) => name.to_string(),
-        None => {
-            return Err(AppError::new(
+    let service_name = iter
+        .next()
+        .ok_or_else(|| {
+            AppError::new(
                 ErrorType::IncorrectNumberOfParameters,
                 String::from("Can't find service name."),
-            ));
-        }
-    };
+            )
+        })?
+        .to_string();
 
-    let login = match iter.next() {
-        Some(login) => login.to_string(),
-        None => {
-            return Err(AppError::new(
+    let login = iter
+        .next()
+        .ok_or_else(|| {
+            AppError::new(
                 ErrorType::IncorrectNumberOfParameters,
                 String::from("Can't find login."),
-            ));
-        }
-    };
-    let password = match iter.next() {
-        Some(password_length) => match password_length.parse::<T>() {
-            Ok(password_info) => password_info.get_password(),
-            Err(_) => {
-                return Err(AppError::new(
-                    ErrorType::ParseError,
-                    String::from("Can't parse password length in usize."),
-                ));
-            }
-        },
-        None => {
-            return Err(AppError::new(
+            )
+        })?
+        .to_string();
+
+    let password = iter
+        .next()
+        .ok_or_else(|| {
+            AppError::new(
                 ErrorType::IncorrectNumberOfParameters,
                 String::from("Can't find password."),
-            ));
-        }
-    };
+            )
+        })?
+        .parse::<T>()
+        .map_err(|_| {
+            AppError::new(
+                ErrorType::ParseError,
+                String::from("Can't parse password length in usize."),
+            )
+        })?
+        .get_password();
+
     Ok(Service::new(service_name, login, password))
 }
