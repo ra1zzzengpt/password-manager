@@ -4,6 +4,6 @@ pub mod parser;
 pub mod utils;
 
 fn main() -> std::io::Result<()> {
-    menu::menu_print();
+    menu::menu_run();
     Ok(())
 }
