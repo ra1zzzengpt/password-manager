@@ -1,5 +1,5 @@
 use crate::models::command::SubCommand;
-use crate::models::errors::AppError;
+use crate::models::errors::{AppError, ErrorType};
 use crate::models::service::Service;
 use crate::utils::files::{add_to_file, read_from_file, rewrite_to_file};
 pub struct Container {
@@ -54,5 +54,14 @@ impl Container {
         } else {
             String::from("No services found")
         }
+    }
+
+    pub fn remove(&mut self, service_name : &String) -> Result<(), AppError> {
+        let length = self.services.len();
+        self.services.retain(|service| service.name() != service_name);
+        if length == self.services.len() {
+            return Err(AppError::new(ErrorType::NotFound,format!("Service {} not found", service_name)))
+        };
+        self.save_with_rewrite()
     }
 }
