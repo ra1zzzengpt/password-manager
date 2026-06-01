@@ -6,24 +6,25 @@ use crate::utils::generate::generate_password;
 pub enum CommandRunner {
     CommandSuccess(String),
     CommandFailure(AppError),
+    CommandClear,
     CommandHelp,
     CommandExit,
     UnknownCommand(String),
 }
 
-pub struct AppController {
+pub struct Controller {
     container: Container,
 }
 
-impl Default for AppController {
+impl Default for Controller {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl AppController {
-    pub fn new() -> AppController {
-        AppController {
+impl Controller {
+    pub fn new() -> Controller {
+        Controller {
             container: Container::default(),
         }
     }
@@ -43,6 +44,14 @@ impl AppController {
                 Err(error) => CommandRunner::CommandFailure(error),
             },
 
+            Command::Remove(res) => match res {
+                Ok(res) => match self.container.remove(&res) {
+                    Ok(_) => CommandRunner::CommandSuccess("Deleted".to_string()),
+                    Err(error) => CommandRunner::CommandFailure(error),
+                },
+                Err(error) => CommandRunner::CommandFailure(error),
+            }
+
             Command::SaveWithRewrite => match self.container.save_with_rewrite() {
                 Ok(_) => CommandRunner::CommandSuccess("Saved to save.txt".to_string()),
                 Err(error) => CommandRunner::CommandFailure(error),
@@ -50,6 +59,10 @@ impl AppController {
 
             Command::List(subcommand) => {
                 CommandRunner::CommandSuccess(self.container.list(&subcommand))
+            }
+
+            Command::Clear =>{
+                CommandRunner::CommandClear
             }
 
             Command::Help => CommandRunner::CommandHelp,
