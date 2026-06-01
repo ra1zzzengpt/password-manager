@@ -1,12 +1,9 @@
-use crate::models::controller::{AppController, CommandRunner};
-use crate::utils::console::read;
+use crate::models::controller::{Controller, CommandRunner};
+use crate::utils::console::{read,console_clear};
 
-pub fn menu_print() {
-    println!("_____ _ _ _ ____  _____");
-    println!("|  _  | | | |    \\|     |");
-    println!("|   __| | | |  |  | | | |");
-    println!("|__|  |_____|____/|_|_|_|");
-    let mut appcontroller = AppController::default();
+pub fn menu_run() {
+    print_menu();
+    let mut appcontroller = Controller::default();
     if let Err(e) = appcontroller.load() {
         eprintln!("{e}");
     }
@@ -17,6 +14,10 @@ pub fn menu_print() {
             }
             CommandRunner::CommandFailure(failure) => {
                 eprintln!("{failure}");
+            }
+            CommandRunner::CommandClear => {
+                console_clear();
+                print_menu();
             }
             CommandRunner::CommandHelp => {
                 print_help();
@@ -37,8 +38,17 @@ fn print_help() {
     println!(
         "/gen | generate | g - [SERVICE NAME] [LOGIN] [PASSWORD LENGTH] - generate random password for service"
     );
+    println!("/rm | r - [SERVICE NAME] remove service");
     println!("/fastgen | fg - [PASSWORD LENGTH] - generate random password (DON'T SAVE)");
     println!("/list | l - list all available services");
     println!("/save | s - save passwords to file with rewrite");
+    println!("/clear | c - clear screen");
     println!("/quit | q | exit - exit");
+}
+
+fn print_menu() {
+    println!("_____ _ _ _ ____  _____");
+    println!("|  _  | | | |    \\|     |");
+    println!("|   __| | | |  |  | | | |");
+    println!("|__|  |_____|____/|_|_|_|");
 }
