@@ -50,7 +50,7 @@ impl Controller {
                     Err(error) => CommandRunner::CommandFailure(error),
                 },
                 Err(error) => CommandRunner::CommandFailure(error),
-            }
+            },
 
             Command::SaveWithRewrite => match self.container.save_with_rewrite() {
                 Ok(_) => CommandRunner::CommandSuccess("Saved to save.txt".to_string()),
@@ -61,9 +61,7 @@ impl Controller {
                 CommandRunner::CommandSuccess(self.container.list(&subcommand))
             }
 
-            Command::Clear =>{
-                CommandRunner::CommandClear
-            }
+            Command::Clear => CommandRunner::CommandClear,
 
             Command::Help => CommandRunner::CommandHelp,
 
