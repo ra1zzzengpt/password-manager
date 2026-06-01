@@ -28,6 +28,8 @@ pub fn read_from_file(path: &std::path::Path) -> Result<Vec<Service>, AppError> 
     let mut vector: Vec<Service> = Vec::new();
     let file = OpenOptions::new()
         .read(true)
+        .append(true)
+        .create(true)
         .open(path)
         .map_err(|error| AppError::new(ErrorType::FileOpenError, error.to_string()))?;
     let reader = BufReader::new(file);
