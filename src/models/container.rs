@@ -56,11 +56,15 @@ impl Container {
         }
     }
 
-    pub fn remove(&mut self, service_name : &String) -> Result<(), AppError> {
+    pub fn remove(&mut self, service_name: &String) -> Result<(), AppError> {
         let length = self.services.len();
-        self.services.retain(|service| service.name() != service_name);
+        self.services
+            .retain(|service| service.name() != service_name);
         if length == self.services.len() {
-            return Err(AppError::new(ErrorType::NotFound,format!("Service {} not found", service_name)))
+            return Err(AppError::new(
+                ErrorType::NotFound,
+                format!("Service {} not found", service_name),
+            ));
         };
         self.save_with_rewrite()
     }
