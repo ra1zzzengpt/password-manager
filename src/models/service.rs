@@ -27,4 +27,7 @@ impl Service {
     pub fn name(&self) -> &str {
         &self.service_name
     }
+    pub fn login(&self) -> &str {
+        &self.login
+    }
 }
