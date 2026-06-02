@@ -21,8 +21,8 @@ keep them in a local vault file, and manage them from a simple command prompt.
 | `/generate` | `/gen`, `/g`         | `<service> <login> <length>`    | Generate a random password of `<length>` and store it |
 | `/add`      | `/a`                 | `<service> <login> <password>`  | Store an existing password                            |
 | `/fastgen`  | `/fg`                | `<length>`                      | Generate a one-off password (not saved)               |
-| `/list`     | `/l`                 | `[service]`                     | List all entries, or only those matching `<service>`  |
-| `/remove`   | `/rm`, `/r`          | `<service>`                     | Remove all entries for `<service>`                    |
+| `/list`     | `/l`                 | `[service] [login]`             | List all entries, or filter by `<service>` (and `<login>`) |
+| `/remove`   | `/rm`, `/r`          | `<service> [login]`             | Remove entries for `<service>`, optionally narrowed by `<login>` |
 | `/save`     | `/s`                 | —                               | Rewrite the vault file from memory                    |
 | `/clear`    | `/c`                 | —                               | Clear the screen                                      |
 | `/help`     | `/h`                 | —                               | Show available commands                               |
