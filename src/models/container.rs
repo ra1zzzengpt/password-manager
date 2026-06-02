@@ -1,7 +1,8 @@
-use crate::models::command::SubCommand;
 use crate::models::errors::{AppError, ErrorType};
 use crate::models::service::Service;
+use crate::models::target::Target;
 use crate::utils::files::{add_to_file, read_from_file, rewrite_to_file};
+
 pub struct Container {
     services: Vec<Service>,
 }
@@ -12,6 +13,7 @@ impl Default for Container {
     }
 }
 impl Container {
+    #[must_use]
     pub fn new() -> Container {
         Container {
             services: Vec::new(),
@@ -36,14 +38,19 @@ impl Container {
         add_to_file(std::path::Path::new("save.txt"), content.as_str())
     }
 
-    pub fn list(&self, sub: &SubCommand) -> String {
-        let services = match sub {
-            SubCommand::ByService(name) => &self
+    pub fn list(&self, target: &Target) -> String {
+        let services = match (&target.service_name(), &target.service_login()) {
+            (Some(name), Some(login)) => self
+                .services
+                .iter()
+                .filter(|service| service.name() == name && service.login() == login)
+                .collect::<Vec<&Service>>(),
+            (Some(name), None) => self
                 .services
                 .iter()
                 .filter(|service| service.name() == name)
                 .collect::<Vec<&Service>>(),
-            SubCommand::Default => &self.services.iter().collect::<Vec<&Service>>(),
+            (None, _) => self.services.iter().collect::<Vec<&Service>>(),
         };
         if !services.is_empty() {
             services
@@ -56,14 +63,28 @@ impl Container {
         }
     }
 
-    pub fn remove(&mut self, service_name: &String) -> Result<(), AppError> {
+    pub fn remove(&mut self, target_service: &Target) -> Result<(), AppError> {
         let length = self.services.len();
-        self.services
-            .retain(|service| service.name() != service_name);
+        match (
+            target_service.service_name().as_ref(),
+            target_service.service_login().as_ref(),
+        ) {
+            (Some(name), Some(login)) => {
+                self.services
+                    .retain(|service| service.name() != name || service.login() != login);
+            }
+            (Some(name), None) => {
+                self.services.retain(|service| service.name() != name);
+            }
+            (None, _) => (), // <- This place can't be used (target_service MUST have service_name in parsers)
+        }
         if length == self.services.len() {
             return Err(AppError::new(
                 ErrorType::NotFound,
-                format!("Service {} not found", service_name),
+                format!(
+                    "Service {} not found",
+                    target_service.service_name().as_ref().unwrap()
+                ), // unwrap here can be used because we have service_name
             ));
         };
         self.save_with_rewrite()
