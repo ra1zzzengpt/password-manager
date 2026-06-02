@@ -32,6 +32,7 @@ pub fn menu_run() {
     }
 }
 
+// CLAUDE --- WORK
 fn print_help() {
     println!();
     println!("  {}", term_ansi::bold!("{}", "COMMANDS"));
@@ -70,10 +71,10 @@ fn print_help() {
     println!(
         "  {}  {}",
         term_ansi::cyan!("{}", "/rm /remove /r"),
-        term_ansi::yellow!("{}", "<SERVICE>")
+        term_ansi::yellow!("{}", "<SERVICE> [LOGIN]")
     );
     println!(
-        "   {} remove a service",
+        "   {} remove a service, optionally narrowed by login",
         term_ansi::rgb!(110, 110, 110, "{}", "└─")
     );
 
@@ -90,10 +91,10 @@ fn print_help() {
     println!(
         "  {}  {}",
         term_ansi::cyan!("{}", "/list /l"),
-        term_ansi::yellow!("{}", "[SERVICE]")
+        term_ansi::yellow!("{}", "[SERVICE] [LOGIN]")
     );
     println!(
-        "   {} list every service, or one by name",
+        "   {} list every service, or filter by name (and login)",
         term_ansi::rgb!(110, 110, 110, "{}", "└─")
     );
 
