@@ -23,6 +23,7 @@ impl Default for Controller {
 }
 
 impl Controller {
+    #[must_use]
     pub fn new() -> Controller {
         Controller {
             container: Container::default(),
@@ -57,9 +58,10 @@ impl Controller {
                 Err(error) => CommandRunner::CommandFailure(error),
             },
 
-            Command::List(subcommand) => {
-                CommandRunner::CommandSuccess(self.container.list(&subcommand))
-            }
+            Command::List(target) => match target {
+                Ok(target) => CommandRunner::CommandSuccess(self.container.list(&target)),
+                Err(error) => CommandRunner::CommandFailure(error),
+            },
 
             Command::Clear => CommandRunner::CommandClear,
 
