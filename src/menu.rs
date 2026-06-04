@@ -2,6 +2,7 @@ use crate::models::controller::{CommandRunner, Controller};
 use crate::utils::console::{console_clear, read};
 
 pub fn menu_run() {
+    console_clear();
     print_menu();
     let mut appcontroller = Controller::default();
     if let Err(e) = appcontroller.load() {
@@ -32,90 +33,27 @@ pub fn menu_run() {
     }
 }
 
-// CLAUDE --- WORK
 fn print_help() {
-    println!();
-    println!("  {}", term_ansi::bold!("{}", "COMMANDS"));
-    println!(
-        "  {}",
-        term_ansi::italic!("{}", "command <REQUIRED>  [OPTIONAL]")
-    );
-    println!();
-
-    println!("  {}", term_ansi::cyan!("{}", "/help /h"));
-    println!(
-        "   {} display this help",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!(
-        "  {}  {}",
-        term_ansi::cyan!("{}", "/add /a"),
-        term_ansi::yellow!("{}", "<SERVICE> <LOGIN> <PASSWORD>")
-    );
-    println!(
-        "   {} add a service with your own password",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!(
-        "  {}  {}",
-        term_ansi::cyan!("{}", "/gen /generate /g"),
-        term_ansi::yellow!("{}", "<SERVICE> <LOGIN> <LENGTH>")
-    );
-    println!(
-        "   {} add a service with a generated password",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!(
-        "  {}  {}",
-        term_ansi::cyan!("{}", "/rm /remove /r"),
-        term_ansi::yellow!("{}", "<SERVICE> [LOGIN]")
-    );
-    println!(
-        "   {} remove a service, optionally narrowed by login",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!(
-        "  {}  {}",
-        term_ansi::cyan!("{}", "/fastgen /fg"),
-        term_ansi::yellow!("{}", "<LENGTH>")
-    );
-    println!(
-        "   {} generate a one-off password (not saved)",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!(
-        "  {}  {}",
-        term_ansi::cyan!("{}", "/list /l"),
-        term_ansi::yellow!("{}", "[SERVICE] [LOGIN]")
-    );
-    println!(
-        "   {} list every service, or filter by name (and login)",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!("  {}", term_ansi::cyan!("{}", "/save /s"));
-    println!(
-        "   {} save passwords to file (overwrite)",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!("  {}", term_ansi::cyan!("{}", "/clear /c"));
-    println!(
-        "   {} clear the screen",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-
-    println!("  {}", term_ansi::cyan!("{}", "/quit /q /exit"));
-    println!(
-        "   {} exit the manager",
-        term_ansi::rgb!(110, 110, 110, "{}", "└─")
-    );
-    println!();
+    println!("COMMANDS");
+    println!("{}", term_ansi::bold!("{}", "command <REQUIRED>  [OPTIONAL]"));
+    println!("/help /h");
+    println!(" └─ display this help");
+    println!("/add /a  <SERVICE> <LOGIN> <PASSWORD>");
+    println!(" └─ add a service with your own password");
+    println!("/gen /generate /g  <SERVICE> <LOGIN> <LENGTH>");
+    println!(" └─ add a service with a generated password");
+    println!("/rm /remove /r  <SERVICE> [LOGIN]");
+    println!(" └─ remove a service, optionally narrowed by login");
+    println!("/fastgen /fg  <LENGTH>");
+    println!(" └─ generate a one-off password (not saved)");
+    println!("/list /l  [SERVICE] [LOGIN]");
+    println!(" └─ list every service, or filter by name (and login)");
+    println!("/save /s");
+    println!(" └─ save passwords to file (overwrite)");
+    println!("/clear /c");
+    println!(" └─ clear the screen");
+    println!("/quit /q /exit");
+    println!(" └─ exit the manager");
 }
 
 fn print_menu() {
