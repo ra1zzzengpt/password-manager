@@ -35,7 +35,10 @@ pub fn menu_run() {
 
 fn print_help() {
     println!("COMMANDS");
-    println!("{}", term_ansi::bold!("{}", "command <REQUIRED>  [OPTIONAL]"));
+    println!(
+        "{}",
+        term_ansi::bold!("{}", "command <REQUIRED>  [OPTIONAL]")
+    );
     println!("/help /h");
     println!(" └─ display this help");
     println!("/add /a  <SERVICE> <LOGIN> <PASSWORD>");
