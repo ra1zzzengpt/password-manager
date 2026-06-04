@@ -21,6 +21,20 @@ impl Container {
     }
 
     pub fn add_service(&mut self, service: &Service) -> Result<(), AppError> {
+        if self
+            .services
+            .iter()
+            .any(|s| s.name() == service.name() && s.login() == service.login())
+        {
+            return Err(AppError::new(
+                ErrorType::ServiceIsAvailable,
+                format!(
+                    "service: {} with login: {} already exists",
+                    service.name(),
+                    service.login()
+                ),
+            ));
+        };
         self.services.push(service.clone());
         Container::save_to_add(service.to_string())
     }
