@@ -13,6 +13,7 @@ pub enum ErrorType {
     FileWriteError,
     FileCreateError,
     NotFound,
+    ServiceIsAvailable,
 }
 impl std::fmt::Display for ErrorType {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -24,6 +25,7 @@ impl std::fmt::Display for ErrorType {
             ErrorType::FileWriteError => String::from("FileWriteError"),
             ErrorType::FileCreateError => String::from("FileCreateError"),
             ErrorType::NotFound => String::from("NotFound"),
+            ErrorType::ServiceIsAvailable => String::from("ServiceIsAvailable"),
         };
         write!(formatter, "{}", message)
     }
