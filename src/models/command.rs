@@ -20,6 +20,7 @@ pub enum Command {
 impl From<&str> for Command {
     fn from(command: &str) -> Self {
         let mut split = command.split_whitespace();
+        // todo: in Vec + parse flags
         match split.next().unwrap_or("?") {
             "/h" | "/help" => Command::Help,
 

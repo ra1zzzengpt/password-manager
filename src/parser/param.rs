@@ -1,5 +1,6 @@
 use crate::models::errors::{AppError, ErrorType};
 
+// todo: parse from Vec<&str>
 pub fn next_required<T: std::str::FromStr>(
     iter: &mut std::str::SplitWhitespace,
 ) -> Result<T, AppError> {
