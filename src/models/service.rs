@@ -30,4 +30,8 @@ impl Service {
     pub fn login(&self) -> &str {
         &self.login
     }
+
+    pub fn to_string_hidden_password(&self) -> String {
+        format!("{} {} {}", self.service_name, self.login, "*".repeat(self.password.len()))
+    }
 }

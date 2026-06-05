@@ -69,7 +69,7 @@ impl Container {
         if !services.is_empty() {
             services
                 .iter()
-                .map(|service| service.to_string())
+                .map(|service| service.to_string_hidden_password())
                 .collect::<Vec<String>>()
                 .join("\n")
         } else {
