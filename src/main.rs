@@ -1,3 +1,4 @@
+pub mod core;
 pub mod menu;
 pub mod models;
 pub mod parser;
