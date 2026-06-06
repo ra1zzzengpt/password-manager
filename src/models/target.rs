@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Target {
     service_name: Option<String>,
     service_login: Option<String>,
@@ -12,11 +13,11 @@ impl Target {
         }
     }
 
-    pub fn service_name(&self) -> Option<String> {
+    pub fn name(&self) -> Option<String> {
         self.service_name.clone()
     }
 
-    pub fn service_login(&self) -> Option<String> {
+    pub fn login(&self) -> Option<String> {
         self.service_login.clone()
     }
 }
