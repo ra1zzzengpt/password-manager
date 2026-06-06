@@ -14,7 +14,10 @@ pub enum ErrorType {
     FileCreateError,
     NotFound,
     ServiceIsAvailable,
+    IncorrectFlags,
+    ArboardError,
 }
+
 impl std::fmt::Display for ErrorType {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         let message = match &self {
@@ -26,6 +29,8 @@ impl std::fmt::Display for ErrorType {
             ErrorType::FileCreateError => String::from("FileCreateError"),
             ErrorType::NotFound => String::from("NotFound"),
             ErrorType::ServiceIsAvailable => String::from("ServiceIsAvailable"),
+            ErrorType::IncorrectFlags => String::from("IncorrectFlags"),
+            ErrorType::ArboardError => String::from("ArboardError"),
         };
         write!(formatter, "{}", message)
     }
