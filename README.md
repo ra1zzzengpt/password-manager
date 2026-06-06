@@ -5,14 +5,18 @@ keep them in a local vault file, and manage them from a simple command prompt.
 
 > ⚠️ **Not secure yet.** The vault (`save.txt`) is stored in **plaintext**.
 > Don't keep real secrets in it until encryption lands — see Roadmap v0.6.
+> `/copy` also places the password on the system clipboard, where other apps can
+> read it and it is not cleared automatically.
 
-## Current version — v0.2
+## Current version — v0.3
 
 - Command-driven REPL with a small set of slash-commands
 - Cryptographically-random password generation with a configurable length
 - Persistent vault: entries are auto-loaded on startup and written to `save.txt`
-- List every entry or filter by service name
-- Remove entries by service name
+- List every entry or filter by service name and login
+- Passwords are masked (`****`) by default; reveal them with `--show`
+- Copy a password straight to the system clipboard (`/copy`)
+- Remove entries by service name (and optional login)
 
 ### Commands
 
@@ -20,13 +24,20 @@ keep them in a local vault file, and manage them from a simple command prompt.
 |-------------|----------------------|---------------------------------|-------------------------------------------------------|
 | `/generate` | `/gen`, `/g`         | `<service> <login> <length>`    | Generate a random password of `<length>` and store it |
 | `/add`      | `/a`                 | `<service> <login> <password>`  | Store an existing password                            |
+| `/copy`     | `/cp`                | `<service> <login>`             | Copy a stored password to the system clipboard        |
 | `/fastgen`  | `/fg`                | `<length>`                      | Generate a one-off password (not saved)               |
-| `/list`     | `/l`                 | `[service] [login]`             | List all entries, or filter by `<service>` (and `<login>`) |
+| `/list`     | `/l`                 | `[service] [login]` `[--show]`  | List all entries, or filter by `<service>` (and `<login>`) |
 | `/remove`   | `/rm`, `/r`          | `<service> [login]`             | Remove entries for `<service>`, optionally narrowed by `<login>` |
 | `/save`     | `/s`                 | —                               | Rewrite the vault file from memory                    |
 | `/clear`    | `/c`                 | —                               | Clear the screen                                      |
 | `/help`     | `/h`                 | —                               | Show available commands                               |
 | `/quit`     | `/q`, `/exit`        | —                               | Exit                                                  |
+
+### Flags
+
+| Flag       | Aliases | Applies to | Effect                                            |
+|------------|---------|------------|---------------------------------------------------|
+| `--show`   | `--s`   | `/list`    | Reveal real passwords instead of masking as `****` |
 
 ### Storage format
 
@@ -54,7 +65,8 @@ cargo run
 
 - [x] **v0.2 — File storage:** persistent local vault (`save.txt`)
 - [x] **v0.2 — Remove:** delete entries by service name (`/remove`)
-- [ ] **v0.3 — Filtering & lookup:** filter by login and quick lookup *(filter by service already works)*
+- [x] **v0.3 — Filtering & lookup:** filter by service and login, masked output with `--show`
+- [x] **v0.3 — Clipboard:** copy a password without printing it (`/copy`)
 - [ ] **v0.4 — Edit:** modify existing entries in place
 - [ ] **v0.5 — Dump & export:** portable export format for vault migration
 - [ ] **v0.6 — Encryption:** protect the vault with a master password
