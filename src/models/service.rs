@@ -5,16 +5,6 @@ pub struct Service {
     password: String,
 }
 
-impl std::fmt::Display for Service {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            formatter,
-            "{} {} {}",
-            self.service_name, self.login, self.password
-        )
-    }
-}
-
 impl Service {
     pub fn new(service_name: String, login: String, password: String) -> Service {
         Service {
@@ -27,11 +17,31 @@ impl Service {
     pub fn name(&self) -> &str {
         &self.service_name
     }
+
     pub fn login(&self) -> &str {
         &self.login
     }
 
+    pub fn password(&self) -> &str {
+        &self.password
+    }
+
     pub fn to_string_hidden_password(&self) -> String {
-        format!("{} {} {}", self.service_name, self.login, "*".repeat(self.password.len()))
+        format!(
+            "{} {} {}",
+            self.service_name,
+            self.login,
+            "*".repeat(self.password.chars().count())
+        )
+    }
+}
+
+impl std::fmt::Display for Service {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            formatter,
+            "{} {} {}",
+            self.service_name, self.login, self.password
+        )
     }
 }
