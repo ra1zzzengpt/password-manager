@@ -1,4 +1,5 @@
 use crate::models::errors::{AppError, ErrorType};
+use crate::models::flag::Flags;
 use crate::models::service::Service;
 use crate::models::target::Target;
 use crate::utils::files::{add_to_file, read_from_file, rewrite_to_file};
@@ -12,6 +13,7 @@ impl Default for Container {
         Self::new()
     }
 }
+
 impl Container {
     #[must_use]
     pub fn new() -> Container {
@@ -52,26 +54,34 @@ impl Container {
         add_to_file(std::path::Path::new("save.txt"), content.as_str())
     }
 
-    pub fn list(&self, target: &Target) -> String {
-        let services = match (&target.service_name(), &target.service_login()) {
+    pub fn list(&self, target: &Target, flags: Flags) -> String {
+        let services = match (&target.name(), &target.login()) {
             (Some(name), Some(login)) => self
                 .services
                 .iter()
-                .filter(|service| service.name() == name && service.login() == login)
+                .filter(|service| service.name() == *name && service.login() == *login)
                 .collect::<Vec<&Service>>(),
             (Some(name), None) => self
                 .services
                 .iter()
-                .filter(|service| service.name() == name)
+                .filter(|service| service.name() == *name)
                 .collect::<Vec<&Service>>(),
             (None, _) => self.services.iter().collect::<Vec<&Service>>(),
         };
         if !services.is_empty() {
-            services
-                .iter()
-                .map(|service| service.to_string_hidden_password())
-                .collect::<Vec<String>>()
-                .join("\n")
+            if flags.show {
+                services
+                    .iter()
+                    .map(|service| service.to_string())
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            } else {
+                services
+                    .iter()
+                    .map(|service| service.to_string_hidden_password())
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            }
         } else {
             String::from("No services found")
         }
@@ -80,15 +90,15 @@ impl Container {
     pub fn remove(&mut self, target_service: &Target) -> Result<(), AppError> {
         let length = self.services.len();
         match (
-            target_service.service_name().as_ref(),
-            target_service.service_login().as_ref(),
+            target_service.name().as_ref(),
+            target_service.login().as_ref(),
         ) {
             (Some(name), Some(login)) => {
                 self.services
-                    .retain(|service| service.name() != name || service.login() != login);
+                    .retain(|service| service.name() != *name || service.login() != *login);
             }
             (Some(name), None) => {
-                self.services.retain(|service| service.name() != name);
+                self.services.retain(|service| service.name() != *name);
             }
             (None, _) => (), // <- This place can't be used (target_service MUST have service_name in parsers)
         }
@@ -97,10 +107,16 @@ impl Container {
                 ErrorType::NotFound,
                 format!(
                     "Service {} not found",
-                    target_service.service_name().as_ref().unwrap()
+                    target_service.name().as_ref().unwrap()
                 ), // unwrap here can be used because we have service_name
             ));
         };
         self.save_with_rewrite()
+    }
+
+    pub fn find(&self, target: &Target) -> Option<&Service> {
+        self.services.iter().find(|service| {
+            service.name() == target.name().unwrap() || service.login() == target.login().unwrap()
+        })
     }
 }
