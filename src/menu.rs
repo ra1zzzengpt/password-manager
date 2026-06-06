@@ -1,4 +1,4 @@
-use crate::models::controller::{CommandRunner, Controller};
+use crate::core::controller::{CommandRunner, Controller};
 use crate::utils::console::{console_clear, read};
 
 pub fn menu_run() {
@@ -37,7 +37,7 @@ fn print_help() {
     println!("COMMANDS");
     println!(
         "{}",
-        term_ansi::bold!("{}", "command <REQUIRED>  [OPTIONAL]")
+        term_ansi::bold!("{}", "command <REQUIRED>  [OPTIONAL]  --flag")
     );
     println!("/help /h");
     println!(" └─ display this help");
@@ -45,11 +45,13 @@ fn print_help() {
     println!(" └─ add a service with your own password");
     println!("/gen /generate /g  <SERVICE> <LOGIN> <LENGTH>");
     println!(" └─ add a service with a generated password");
+    println!("/copy /cp  <SERVICE> <LOGIN>");
+    println!(" └─ copy a service's password to the clipboard");
     println!("/rm /remove /r  <SERVICE> [LOGIN]");
     println!(" └─ remove a service, optionally narrowed by login");
     println!("/fastgen /fg  <LENGTH>");
     println!(" └─ generate a one-off password (not saved)");
-    println!("/list /l  [SERVICE] [LOGIN]");
+    println!("/list /l  [SERVICE] [LOGIN]  [--show]");
     println!(" └─ list every service, or filter by name (and login)");
     println!("/save /s");
     println!(" └─ save passwords to file (overwrite)");
@@ -57,6 +59,10 @@ fn print_help() {
     println!(" └─ clear the screen");
     println!("/quit /q /exit");
     println!(" └─ exit the manager");
+    println!();
+    println!("{}", term_ansi::bold!("{}", "FLAGS"));
+    println!("--show /--s");
+    println!(" └─ with /list: reveal real passwords instead of ****");
 }
 
 fn print_menu() {
