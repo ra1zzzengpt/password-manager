@@ -18,15 +18,15 @@ impl PasswordSource for String {
     }
 }
 
-pub fn parse_service<T>(iter: &mut std::str::SplitWhitespace) -> Result<Service, AppError>
+pub fn parse_service<T>(tokens: &Vec<&str>) -> Result<Service, AppError>
 where
     T: std::str::FromStr + PasswordSource,
 {
-    let service_name = next_required::<String>(iter)?;
+    let service_name = next_required::<String>(tokens, 0)?;
 
-    let login = next_required::<String>(iter)?;
+    let login = next_required::<String>(tokens, 1)?;
 
-    let password = next_required::<T>(iter)?.get_password();
+    let password = next_required::<T>(tokens, 2)?.get_password();
 
     Ok(Service::new(service_name, login, password))
 }
