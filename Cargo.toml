@@ -1,8 +1,9 @@
 [package]
 name = "password-manager"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 
 [dependencies]
 rand = "0.8"
 term_ansi = "0.2.5"
+arboard = { version = "3", features = ["wayland-data-control"] }
