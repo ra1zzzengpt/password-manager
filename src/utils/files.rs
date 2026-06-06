@@ -36,7 +36,8 @@ pub fn read_from_file(path: &std::path::Path) -> Result<Vec<Service>, AppError> 
     for line in reader.lines() {
         match line {
             Ok(line) => {
-                let parsed_service = match parse_service::<String>(&mut line.split_whitespace()) {
+                let tokens: Vec<&str> = line.split_whitespace().collect();
+                let parsed_service = match parse_service::<String>(&tokens) {
                     Ok(service) => service,
                     Err(_) => {
                         println!(
