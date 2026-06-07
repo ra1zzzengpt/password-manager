@@ -1,17 +1,18 @@
-use crate::models::errors::AppError;
 use crate::models::flag::Flags;
 use crate::models::service::Service;
 use crate::models::target::Target;
 
 pub enum Command {
-    Generate(Result<Service, AppError>),
-    Add(Result<Service, AppError>),
-    FastGenerate(Result<usize, AppError>),
-    Remove(Result<Target, AppError>),
+    Generate(Service),
+    Add(Service),
+    FastGenerate(usize),
+    Remove(Target),
+    Edit((Target,Service)),
     SaveWithRewrite,
-    Copy(Result<Target, AppError>),
+    Copy(Target),
     Clear,
-    List(Result<Target, AppError>, Flags),
+    List((Target,Flags)),
+    Dump,
     Help,
     Quit,
     Unknown(String),
