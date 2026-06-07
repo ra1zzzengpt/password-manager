@@ -1,12 +1,13 @@
 use crate::core::container::Container;
 use crate::models::command::Command;
 use crate::models::errors::{AppError, ErrorType};
+use crate::models::target::Target;
 use crate::parser::command::parse_command;
 use crate::utils::generate::generate_password;
 
 pub enum CommandRunner {
-    CommandSuccess(String),
-    CommandFailure(AppError),
+    CommandSuccess(()),
+    CommandSuccessWithOutput(String),
     CommandClear,
     CommandHelp,
     CommandExit,
@@ -31,83 +32,64 @@ impl Controller {
         }
     }
 
-    pub fn command_runner(&mut self, user_input: String) -> CommandRunner {
-        match parse_command(user_input.as_str()) {
+    pub fn command_runner(&mut self, user_input: &str) -> Result<CommandRunner, AppError> {
+        match parse_command(user_input) {
             Ok(command) => match command {
-                Command::Generate(result) | Command::Add(result) => match result {
-                    Ok(service) => match self.container.add_service(&service) {
-                        Ok(_) => CommandRunner::CommandSuccess(service.to_string()),
-                        Err(error) => CommandRunner::CommandFailure(error),
-                    },
-                    Err(error) => CommandRunner::CommandFailure(error),
-                },
+                Command::Generate(service) | Command::Add(service) => Ok(CommandRunner::CommandSuccess(self.container.add_service(service)?)),
 
-                Command::FastGenerate(res_fg) => match res_fg {
-                    Ok(length) => CommandRunner::CommandSuccess(generate_password(length)),
-                    Err(error) => CommandRunner::CommandFailure(error),
-                },
+                Command::FastGenerate(length) => Ok(CommandRunner::CommandSuccessWithOutput(generate_password(length))),
 
-                Command::Remove(res) => match res {
-                    Ok(res) => match self.container.remove(&res) {
-                        Ok(_) => CommandRunner::CommandSuccess("Deleted".to_string()),
-                        Err(error) => CommandRunner::CommandFailure(error),
-                    },
-                    Err(error) => CommandRunner::CommandFailure(error),
-                },
+                Command::Remove(target) => Ok(CommandRunner::CommandSuccess(self.container.remove(&target)?)),
 
-                Command::SaveWithRewrite => match self.container.save_with_rewrite() {
-                    Ok(_) => CommandRunner::CommandSuccess("Saved to save.txt".to_string()),
-                    Err(error) => CommandRunner::CommandFailure(error),
-                },
+                Command::SaveWithRewrite => Ok(CommandRunner::CommandSuccess(self.container.save_with_rewrite()?)),
 
-                Command::Copy(res) => match res {
-                    Ok(target) => match self.container.find(&target) {
-                        Some(result) => {
-                            let mut clipboard = match arboard::Clipboard::new() {
-                                Ok(clipboard) => clipboard,
-                                Err(error) => {
-                                    return CommandRunner::CommandFailure(AppError::new(
-                                        ErrorType::ArboardError,
-                                        error.to_string(),
-                                    ));
-                                }
-                            };
-                            match clipboard.set_text(result.password().to_string()) {
-                                Ok(_) => CommandRunner::CommandSuccess("Copied".to_string()),
-                                Err(error) => CommandRunner::CommandFailure(AppError::new(
-                                    ErrorType::ArboardError,
-                                    error.to_string(),
-                                )),
-                            }
-                        }
-                        None => CommandRunner::CommandFailure(AppError::new(
-                            ErrorType::NotFound,
-                            format!("{:?} not found.", target),
-                        )),
-                    },
-                    Err(error) => CommandRunner::CommandFailure(error),
-                },
+                Command::Copy(target) => Ok(CommandRunner::CommandSuccess(self.copy_to_clipboard(&target)?)) ,
 
-                Command::List(target, flags) => match target {
-                    Ok(target) => {
-                        CommandRunner::CommandSuccess(self.container.list(&target, flags))
-                    }
-                    Err(error) => CommandRunner::CommandFailure(error),
-                },
+                Command::Edit((target,service)) => Ok(CommandRunner::CommandSuccess(self.container.edit(&target, service)?)),
 
-                Command::Clear => CommandRunner::CommandClear,
+                Command::Dump => Ok(CommandRunner::CommandSuccess(self.container.dump()?)),
 
-                Command::Help => CommandRunner::CommandHelp,
+                Command::List((target,flags)) => Ok(CommandRunner::CommandSuccessWithOutput(self.container.list(&target, &flags))),
 
-                Command::Quit => CommandRunner::CommandExit,
+                Command::Clear => Ok(CommandRunner::CommandClear),
 
-                Command::Unknown(unknown) => CommandRunner::UnknownCommand(unknown),
+                Command::Help => Ok(CommandRunner::CommandHelp),
+
+                Command::Quit => Ok(CommandRunner::CommandExit),
+
+                Command::Unknown(unknown) => Ok(CommandRunner::UnknownCommand(unknown)),
             },
-            Err(error) => CommandRunner::CommandFailure(error),
+            Err(error) => Err(error),
         }
     }
 
     pub fn load(&mut self) -> Result<(), AppError> {
         self.container.load()
+    }
+
+    pub fn copy_to_clipboard(&self, target : &Target) -> Result<(), AppError> {
+        match self.container.find(&target) {
+            Some(result) => {
+                let mut clipboard = match arboard::Clipboard::new() {
+                    Ok(clipboard) => clipboard,
+                    Err(error) =>
+                        return Err(AppError::new(
+                            ErrorType::ArboardError,
+                            error.to_string(),
+                        )),
+                };
+                match clipboard.set_text(result.password().to_string()) {
+                    Ok(_) => Ok(()),
+                    Err(error) => Err(AppError::new(
+                        ErrorType::ArboardError,
+                        error.to_string(),
+                    )),
+                }
+            }
+            None => Err(AppError::new(
+                ErrorType::NotFound,
+                format!("{:?} not found.", target),
+            )),
+        }
     }
 }
