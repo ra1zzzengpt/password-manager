@@ -4,7 +4,7 @@ use crate::parser::service::parse_service;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 
-pub fn rewrite_to_file(path: &std::path::Path, content: &Vec<Service>) -> Result<(), AppError> {
+pub fn rewrite_to_file(path: &std::path::Path, content: &[Service]) -> Result<(), AppError> {
     let mut file = File::create(path)
         .map_err(|error| AppError::new(ErrorType::FileCreateError, error.to_string()))?;
     for service in content {
