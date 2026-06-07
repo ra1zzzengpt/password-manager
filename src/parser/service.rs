@@ -3,24 +3,24 @@ use crate::models::service::Service;
 use crate::parser::param::next_required;
 use crate::utils::generate::generate_password;
 
-pub trait PasswordSource {
+pub trait PasswordRequirement {
     fn get_password(self) -> String;
 }
 
-impl PasswordSource for usize {
+impl PasswordRequirement for usize {
     fn get_password(self) -> String {
         generate_password(self)
     }
 }
-impl PasswordSource for String {
+impl PasswordRequirement for String {
     fn get_password(self) -> String {
         self
     }
 }
 
-pub fn parse_service<T>(tokens: &Vec<&str>) -> Result<Service, AppError>
+pub fn parse_service<T>(tokens: &[&str]) -> Result<Service, AppError>
 where
-    T: std::str::FromStr + PasswordSource,
+    T: std::str::FromStr + PasswordRequirement,
 {
     let service_name = next_required::<String>(tokens, 0)?;
 
