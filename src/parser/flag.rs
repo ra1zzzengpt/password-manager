@@ -1,7 +1,7 @@
 use crate::models::errors::{AppError, ErrorType};
 use crate::models::flag::Flags;
 
-pub fn parse_flags(tokens: &Vec<&str>) -> Result<Flags, AppError> {
+pub fn parse_flags(tokens: &[&str]) -> Result<Flags, AppError> {
     let mut flags: Flags = Default::default();
     for token in tokens {
         let (flag, value) = match token.split_once("=") {
