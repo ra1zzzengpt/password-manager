@@ -35,21 +35,35 @@ impl Controller {
     pub fn command_runner(&mut self, user_input: &str) -> Result<CommandRunner, AppError> {
         match parse_command(user_input) {
             Ok(command) => match command {
-                Command::Generate(service) | Command::Add(service) => Ok(CommandRunner::CommandSuccess(self.container.add_service(service)?)),
+                Command::Generate(service) | Command::Add(service) => Ok(
+                    CommandRunner::CommandSuccess(self.container.add_service(service)?),
+                ),
 
-                Command::FastGenerate(length) => Ok(CommandRunner::CommandSuccessWithOutput(generate_password(length))),
+                Command::FastGenerate(length) => Ok(CommandRunner::CommandSuccessWithOutput(
+                    generate_password(length),
+                )),
 
-                Command::Remove(target) => Ok(CommandRunner::CommandSuccess(self.container.remove(&target)?)),
+                Command::Remove(target) => Ok(CommandRunner::CommandSuccess(
+                    self.container.remove(&target)?,
+                )),
 
-                Command::SaveWithRewrite => Ok(CommandRunner::CommandSuccess(self.container.save_with_rewrite()?)),
+                Command::SaveWithRewrite => Ok(CommandRunner::CommandSuccess(
+                    self.container.save_with_rewrite()?,
+                )),
 
-                Command::Copy(target) => Ok(CommandRunner::CommandSuccess(self.copy_to_clipboard(&target)?)) ,
+                Command::Copy(target) => Ok(CommandRunner::CommandSuccess(
+                    self.copy_to_clipboard(&target)?,
+                )),
 
-                Command::Edit((target,service)) => Ok(CommandRunner::CommandSuccess(self.container.edit(&target, service)?)),
+                Command::Edit((target, service)) => Ok(CommandRunner::CommandSuccess(
+                    self.container.edit(&target, service)?,
+                )),
 
                 Command::Dump => Ok(CommandRunner::CommandSuccess(self.container.dump()?)),
 
-                Command::List((target,flags)) => Ok(CommandRunner::CommandSuccessWithOutput(self.container.list(&target, &flags))),
+                Command::List((target, flags)) => Ok(CommandRunner::CommandSuccessWithOutput(
+                    self.container.list(&target, &flags),
+                )),
 
                 Command::Clear => Ok(CommandRunner::CommandClear),
 
@@ -67,23 +81,18 @@ impl Controller {
         self.container.load()
     }
 
-    pub fn copy_to_clipboard(&self, target : &Target) -> Result<(), AppError> {
+    pub fn copy_to_clipboard(&self, target: &Target) -> Result<(), AppError> {
         match self.container.find(&target) {
             Some(result) => {
                 let mut clipboard = match arboard::Clipboard::new() {
                     Ok(clipboard) => clipboard,
-                    Err(error) =>
-                        return Err(AppError::new(
-                            ErrorType::ArboardError,
-                            error.to_string(),
-                        )),
+                    Err(error) => {
+                        return Err(AppError::new(ErrorType::ArboardError, error.to_string()));
+                    }
                 };
                 match clipboard.set_text(result.password().to_string()) {
                     Ok(_) => Ok(()),
-                    Err(error) => Err(AppError::new(
-                        ErrorType::ArboardError,
-                        error.to_string(),
-                    )),
+                    Err(error) => Err(AppError::new(ErrorType::ArboardError, error.to_string())),
                 }
             }
             None => Err(AppError::new(

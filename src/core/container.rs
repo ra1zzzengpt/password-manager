@@ -74,7 +74,7 @@ impl Container {
                 .collect::<Vec<&Service>>(),
             (None, _) => self.services.iter().collect::<Vec<&Service>>(),
         };
-        services.sort_by(|s1,s2| s1.name().cmp(s2.name()));
+        services.sort_by(|s1, s2| s1.name().cmp(s2.name()));
         if !services.is_empty() {
             if flags.show {
                 services
@@ -107,7 +107,7 @@ impl Container {
             (Some(name), None) => {
                 self.services.retain(|service| service.name() != *name);
             }
-            _ => ()// <- This place can't be used (target_service MUST have service_name in parsers)
+            _ => (), // <- This place can't be used (target_service MUST have service_name in parsers)
         }
         if length == self.services.len() {
             return Err(AppError::new(
@@ -121,7 +121,7 @@ impl Container {
         self.save_with_rewrite()
     }
 
-    pub fn edit(&mut self, target_service: &Target, new_service : Service) -> Result<(), AppError> {
+    pub fn edit(&mut self, target_service: &Target, new_service: Service) -> Result<(), AppError> {
         self.remove(target_service)?;
         self.add_service(new_service)?;
         Ok(())

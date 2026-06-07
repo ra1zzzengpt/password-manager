@@ -28,7 +28,7 @@ pub fn menu_run() {
                 CommandRunner::CommandExit => {
                     break;
                 }
-            }
+            },
             Err(error) => eprintln!("{}", term_ansi::red!("{error}")),
         }
     }

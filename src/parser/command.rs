@@ -1,5 +1,5 @@
 use crate::models::command::Command;
-use crate::models::errors::{AppError};
+use crate::models::errors::AppError;
 use crate::models::target::Target;
 use crate::parser::flag::parse_flags;
 use crate::parser::param::{next_optional, next_required};
@@ -35,7 +35,7 @@ pub fn parse_command(command: &str) -> Result<Command, AppError> {
                 Option::from(next_required::<String>(&args, 1)?),
             );
             let service = parse_service::<String>(&args[2..])?;
-            Ok(Command::Edit((target,service)))
+            Ok(Command::Edit((target, service)))
         }
 
         "/cp" | "/copy" => {
@@ -55,7 +55,7 @@ pub fn parse_command(command: &str) -> Result<Command, AppError> {
                 next_optional::<String>(&args, 0)?,
                 next_optional::<String>(&args, 1)?,
             );
-            Ok(Command::List((target,flags)))
+            Ok(Command::List((target, flags)))
         }
 
         "/c" | "/clear" => Ok(Command::Clear),
