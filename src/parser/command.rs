@@ -10,7 +10,7 @@ pub fn parse_command(command: &str) -> Result<Command, AppError> {
         .split_whitespace()
         .partition(|substr| !substr.starts_with("--"));
     if args.is_empty() {
-        return Ok(Command::Unknown(format!("{command}")));
+        return Ok(Command::Unknown(command.to_string()));
     }
     let flags = parse_flags(&raw_flags)?;
     let command = args.remove(0);

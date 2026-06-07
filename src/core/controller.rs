@@ -82,7 +82,7 @@ impl Controller {
     }
 
     pub fn copy_to_clipboard(&self, target: &Target) -> Result<(), AppError> {
-        match self.container.find(&target) {
+        match self.container.find(target) {
             Some(result) => {
                 let mut clipboard = match arboard::Clipboard::new() {
                     Ok(clipboard) => clipboard,
