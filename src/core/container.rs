@@ -22,7 +22,7 @@ impl Container {
         }
     }
 
-    pub fn add_service(&mut self, service: &Service) -> Result<(), AppError> {
+    pub fn add_service(&mut self, service: Service) -> Result<(), AppError> {
         if self
             .services
             .iter()
@@ -38,7 +38,7 @@ impl Container {
             ));
         };
         self.services.push(service.clone());
-        Container::save_to_add(service.to_string())
+        Container::save_to_add(service.to_string().as_str())
     }
 
     pub fn load(&mut self) -> Result<(), AppError> {
@@ -46,16 +46,22 @@ impl Container {
         Ok(())
     }
 
+    pub fn dump(&self) -> Result<(), AppError> {
+        let mut filename = chrono::Local::now().format("%Y-%m-%d=%H:%M:%S").to_string();
+        filename.push_str("-PWDM-DUMP.txt");
+        rewrite_to_file(std::path::Path::new(&filename), &self.services)
+    }
+
     pub fn save_with_rewrite(&self) -> Result<(), AppError> {
         rewrite_to_file(std::path::Path::new("save.txt"), &self.services)
     }
 
-    fn save_to_add(content: String) -> Result<(), AppError> {
-        add_to_file(std::path::Path::new("save.txt"), content.as_str())
+    fn save_to_add(content: &str) -> Result<(), AppError> {
+        add_to_file(std::path::Path::new("save.txt"), content)
     }
 
-    pub fn list(&self, target: &Target, flags: Flags) -> String {
-        let services = match (&target.name(), &target.login()) {
+    pub fn list(&self, target: &Target, flags: &Flags) -> String {
+        let mut services = match (&target.name(), &target.login()) {
             (Some(name), Some(login)) => self
                 .services
                 .iter()
@@ -68,6 +74,7 @@ impl Container {
                 .collect::<Vec<&Service>>(),
             (None, _) => self.services.iter().collect::<Vec<&Service>>(),
         };
+        services.sort_by(|s1,s2| s1.name().cmp(s2.name()));
         if !services.is_empty() {
             if flags.show {
                 services
@@ -100,7 +107,7 @@ impl Container {
             (Some(name), None) => {
                 self.services.retain(|service| service.name() != *name);
             }
-            (None, _) => (), // <- This place can't be used (target_service MUST have service_name in parsers)
+            _ => ()// <- This place can't be used (target_service MUST have service_name in parsers)
         }
         if length == self.services.len() {
             return Err(AppError::new(
@@ -114,9 +121,15 @@ impl Container {
         self.save_with_rewrite()
     }
 
+    pub fn edit(&mut self, target_service: &Target, new_service : Service) -> Result<(), AppError> {
+        self.remove(target_service)?;
+        self.add_service(new_service)?;
+        Ok(())
+    }
+
     pub fn find(&self, target: &Target) -> Option<&Service> {
         self.services.iter().find(|service| {
-            service.name() == target.name().unwrap() || service.login() == target.login().unwrap()
+            service.name() == target.name().unwrap() && service.login() == target.login().unwrap()
         })
     }
 }
