@@ -40,7 +40,7 @@ impl Controller {
                 ),
 
                 Command::FastGenerate(length) => Ok(CommandRunner::CommandSuccessWithOutput(
-                    generate_password(length),
+                    generate_password(length)?,
                 )),
 
                 Command::Remove(target) => Ok(CommandRunner::CommandSuccess(
