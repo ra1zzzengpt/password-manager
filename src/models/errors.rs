@@ -16,6 +16,7 @@ pub enum ErrorType {
     ServiceIsAvailable,
     IncorrectFlags,
     ArboardError,
+    AllocationError,
 }
 
 impl std::fmt::Display for ErrorType {
@@ -31,6 +32,7 @@ impl std::fmt::Display for ErrorType {
             ErrorType::ServiceIsAvailable => String::from("ServiceIsAvailable"),
             ErrorType::IncorrectFlags => String::from("IncorrectFlags"),
             ErrorType::ArboardError => String::from("ArboardError"),
+            ErrorType::AllocationError => String::from("AllocationError"),
         };
         write!(formatter, "{}", message)
     }
