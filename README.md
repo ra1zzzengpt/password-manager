@@ -8,6 +8,9 @@ keep them in a local vault file, and manage them from a simple command prompt.
 > `/copy` also places the password on the system clipboard, where other apps can
 > read it and it is not cleared automatically.
 
+
+> ⚠️⚠️⚠️ **Will be rewrite on C++ with libsodium**
+
 ## Current version — v0.4
 
 - Command-driven REPL with a small set of slash-commands
