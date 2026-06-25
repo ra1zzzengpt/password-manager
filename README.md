@@ -9,7 +9,7 @@ keep them in a local vault file, and manage them from a simple command prompt.
 > read it and it is not cleared automatically.
 
 
-> ⚠️⚠️⚠️ **Will be rewrite on C++ with libsodium**
+> ⚠️⚠️⚠️ **in next update will be required [ratatui](https://github.com/ratatui/ratatui)**
 
 ## Current version — v0.4
 
