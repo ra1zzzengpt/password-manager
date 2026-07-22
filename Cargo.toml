@@ -4,6 +4,11 @@ version = "0.4.0"
 edition = "2024"
 
 [dependencies]
+argon2 = "0.5.3"
+rpassword = "7.5.4"
+chacha20poly1305 = "0.11.0"
+zeroize = "1.9.0"
+
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 
