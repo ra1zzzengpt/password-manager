@@ -38,11 +38,11 @@ impl Container {
             ));
         };
         self.services.push(service.clone());
-        Container::save_to_add(service.to_string().as_str())
+        Container::save_to_add(&service)
     }
 
     pub fn load(&mut self) -> Result<(), AppError> {
-        self.services = read_from_file(std::path::Path::new("save.txt"))?;
+        self.services = read_from_file(std::path::Path::new("save.json"))?;
         Ok(())
     }
 
@@ -53,11 +53,11 @@ impl Container {
     }
 
     pub fn save_with_rewrite(&self) -> Result<(), AppError> {
-        rewrite_to_file(std::path::Path::new("save.txt"), &self.services)
+        rewrite_to_file(std::path::Path::new("save.json"), &self.services)
     }
 
-    fn save_to_add(content: &str) -> Result<(), AppError> {
-        add_to_file(std::path::Path::new("save.txt"), content)
+    fn save_to_add(service: &Service) -> Result<(), AppError> {
+        add_to_file(std::path::Path::new("save.json"), service)
     }
 
     pub fn list(&self, target: &Target, flags: &Flags) -> String {
