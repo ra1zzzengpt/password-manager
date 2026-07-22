@@ -1,4 +1,5 @@
-#[derive(Clone)]
+use serde;
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Service {
     service_name: String,
     login: String,
