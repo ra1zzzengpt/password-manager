@@ -4,6 +4,8 @@ use crate::models::errors::{AppError, ErrorType};
 use crate::models::target::Target;
 use crate::parser::command::parse_command;
 use crate::utils::generate::generate_password;
+use argon2::Argon2;
+use crate::crypto::crypto;
 
 pub enum CommandRunner {
     CommandSuccess(()),
@@ -16,6 +18,7 @@ pub enum CommandRunner {
 
 pub struct Controller {
     container: Container,
+    crypto :
 }
 
 impl Default for Controller {
