@@ -1,5 +1,25 @@
 add_library(pwd-core STATIC
-src/main.cpp)
+        src/controllers/main_controller.cpp
+        src/crypto/sodium.cpp
+        src/crypto/sodium.hpp
+        src/controllers/storage_controller.cpp
+        src/controllers/storage_controller.hpp
+        src/domain/error/error.hpp
+        src/logs/logs.cpp
+        src/logs/logs.hpp
+        src/domain/error/error_type.hpp
+        src/domain/service.hpp
+        src/domain/service.cpp
+        src/ui/pw_screen.cpp
+        src/ui/pw_screen.hpp
+        src/ui/main_screen.cpp
+        src/ui/main_screen.hpp
+        src/constants/paths.hpp
+        src/crypto/helper/sodium_info.cpp
+        src/crypto/helper/sodium_info.hpp
+        src/ui/runner.cpp
+        src/ui/runner.hpp
+)
 
 target_include_directories(
         pwd-core PUBLIC
