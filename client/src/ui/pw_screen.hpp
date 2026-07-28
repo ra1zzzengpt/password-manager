@@ -4,7 +4,7 @@
 
 #include <controllers/main_controller.hpp>
 
-class PWScreen
+class PWScreen final
 {
 public:
     explicit PWScreen(MainController& controller);
@@ -14,7 +14,7 @@ public:
     PWScreen& operator=(const PWScreen&) = delete;
     PWScreen& operator=(PWScreen&&) = delete;
 
-    QWidget* build();
+    QWidget* build(QWidget* root, int32_t& screen_index);
 
 private:
     MainController& controller_;

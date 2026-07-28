@@ -15,4 +15,5 @@ public:
 
 private:
     MainController& controller_;
+    int32_t current_screen_;
 };
