@@ -23,7 +23,7 @@ namespace crypto
 
     std::expected<void, err::Error> Sodium::keyGeneration(const std::vector<uint8_t> &salt)
     {
-        if (!salt_.empty() && salt_ != salt)
+        if (salt_.empty() || salt_ != salt)
         {
             return {};
         }
