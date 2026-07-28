@@ -33,6 +33,8 @@ public:
 
     std::expected<void, err::Error> removeService(/* todo index or service? */);
 
+    const std::vector<Service>& services();
+
 private:
     std::vector<Service> services_;
     crypto::Sodium sodium_;

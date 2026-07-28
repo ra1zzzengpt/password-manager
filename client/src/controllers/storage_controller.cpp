@@ -10,11 +10,11 @@
 std::expected<void, err::Error> StorageController::save()
 {
     const std::filesystem::path path{cnt::save};
-    const std::filesystem::path temp_path{path.string() + ".t"};
+    const std::filesystem::path temp_path{path.string() + ".t"}; // todo lille rework for SAVING file will be temp
     if (!std::filesystem::exists(path))
     {
         std::error_code error_code;
-        std::filesystem::create_directories(path, error_code);
+        std::filesystem::create_directories(path.parent_path(), error_code);
         if (error_code)
         {
             return std::unexpected{
@@ -27,12 +27,14 @@ std::expected<void, err::Error> StorageController::save()
     std::ofstream file{path, std::ios::binary};
     if (!file.is_open())
     {
+        std::filesystem::rename(temp_path, path);
         return std::unexpected{err::Error{err::StorageError::OpenFileFailed, "Can't open file at: " + path.string()}};
     }
     const std::expected<crypto::SodiumInfo, err::Error> encrypted_result = sodium_.encrypt(
         nlohmann::json(services_).dump());
     if (!encrypted_result.has_value())
     {
+        std::filesystem::rename(temp_path, path);
         return std::unexpected{encrypted_result.error()};
     }
     std::vector<uint8_t> write_ready = crypto::port(encrypted_result.value());
@@ -52,7 +54,7 @@ std::expected<void, err::Error> StorageController::load()
     if (!std::filesystem::exists(path))
     {
         std::error_code error_code;
-        std::filesystem::create_directories(path, error_code);
+        std::filesystem::create_directories(path.parent_path(), error_code);
         if (error_code)
         {
             return std::unexpected{err::Error{err::StorageError::CreateDirectoryFailed, "Can't create directory at: " + path.string()}};
@@ -100,9 +102,14 @@ std::expected<void, err::Error> StorageController::load()
     return save();
 }
 
+const std::vector<Service>& StorageController::services()
+{
+    return services_;
+}
+
 std::expected<void, err::Error> StorageController::addService(const Service &service)
 {
-    std::vector old_services{services_};
+    const std::vector old_services{services_};
     services_.push_back(service);
     if (const std::expected<void,err::Error> save_result = save(); !save_result.has_value())
     {
