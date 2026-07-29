@@ -28,12 +28,17 @@ public:
 
     std::expected<void, err::Error> save();
 
+    static std::expected<void, err::Error> del();
+
     // --------------- SERVICES ----------------------
     std::expected<void, err::Error> addService(const Service& service);
 
     std::expected<void, err::Error> removeService(/* todo index or service? */);
 
     const std::vector<Service>& services();
+
+    // --------------- SODIUM -----------------------
+    std::expected<void,err::Error> setMasterPassword(const std::string& password);
 
 private:
     std::vector<Service> services_;

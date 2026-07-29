@@ -7,10 +7,12 @@
 #include <domain/error/error.hpp>
 #include <fstream>
 
+#include <QDebug>
+
 std::expected<void, err::Error> StorageController::save()
 {
     const std::filesystem::path path{cnt::save};
-    const std::filesystem::path temp_path{path.string() + ".t"}; // todo lille rework for SAVING file will be temp
+    const std::filesystem::path temp_path{path.string() + ".temp"}; // todo lille rework for SAVING file will be temp
     if (!std::filesystem::exists(path))
     {
         std::error_code error_code;
@@ -22,19 +24,18 @@ std::expected<void, err::Error> StorageController::save()
             };
         }
     }
-    std::filesystem::rename(path, temp_path);
 
-    std::ofstream file{path, std::ios::binary};
+    std::ofstream file{temp_path, std::ios::binary};
     if (!file.is_open())
     {
-        std::filesystem::rename(temp_path, path);
+        std::filesystem::remove(temp_path);
         return std::unexpected{err::Error{err::StorageError::OpenFileFailed, "Can't open file at: " + path.string()}};
     }
     const std::expected<crypto::SodiumInfo, err::Error> encrypted_result = sodium_.encrypt(
         nlohmann::json(services_).dump());
     if (!encrypted_result.has_value())
     {
-        std::filesystem::rename(temp_path, path);
+        std::filesystem::remove(temp_path);
         return std::unexpected{encrypted_result.error()};
     }
     std::vector<uint8_t> write_ready = crypto::port(encrypted_result.value());
@@ -42,9 +43,10 @@ std::expected<void, err::Error> StorageController::save()
                static_cast<long>(write_ready.size()));
     if (file.bad() || file.fail())
     {
-        std::filesystem::rename(temp_path, path);
+        std::filesystem::remove(temp_path);
         return std::unexpected{err::Error{err::StorageError::FileStreamError, "Error with file stream: " + path.string()}};
     }
+    std::filesystem::rename(temp_path, path);
     return {};
 }
 
@@ -62,12 +64,8 @@ std::expected<void, err::Error> StorageController::load()
     }
 
     std::ifstream file{path, std::ios::binary};
-    if (!file.is_open())
-    {
-        return std::unexpected{err::Error{err::StorageError::OpenFileFailed, "Can't open file at: " + path.string()}};
-    }
 
-    if (file.peek() != std::ifstream::traits_type::eof())
+    if (file.is_open() && file.peek() != std::ifstream::traits_type::eof())
     {
         file.seekg(0, std::ios::end);
         std::streamsize file_size{file.tellg()};
@@ -75,7 +73,6 @@ std::expected<void, err::Error> StorageController::load()
 
         std::vector<uint8_t> data(file_size);
         file.read(reinterpret_cast<std::istream::char_type *>(data.data()), file_size);
-
         const std::expected<crypto::SodiumInfo, err::Error> import_result = crypto::import(data);
         if (!import_result.has_value())
         {
@@ -102,6 +99,23 @@ std::expected<void, err::Error> StorageController::load()
     return save();
 }
 
+std::expected<void, err::Error> StorageController::del()
+{
+    const std::filesystem::path path{cnt::save};
+    if (!std::filesystem::exists(path))
+    {
+        return {};
+    }
+    try
+    {
+        std::filesystem::remove(path);
+    } catch (const std::filesystem::filesystem_error& e)
+    {
+        return std::unexpected{err::Error{err::StorageError::DeleteFailed,e.what()}};
+    }
+    return {};
+}
+
 const std::vector<Service>& StorageController::services()
 {
     return services_;
@@ -117,4 +131,9 @@ std::expected<void, err::Error> StorageController::addService(const Service &ser
         return std::unexpected{save_result.error()};
     }
     return {};
+}
+
+std::expected<void,err::Error> StorageController::setMasterPassword(const std::string &password)
+{
+    return sodium_.setMasterPassword(password);
 }
