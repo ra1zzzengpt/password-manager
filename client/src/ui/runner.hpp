@@ -5,7 +5,7 @@ class Runner final
 {
 public:
     explicit Runner(MainController& controller);
-    ~Runner() = default; // TODO TEMP
+    ~Runner() = default;
     Runner(const Runner &) = delete;
     Runner &operator=(const Runner &) = delete;
     Runner(Runner &&) = delete;
@@ -15,5 +15,5 @@ public:
 
 private:
     MainController& controller_;
-    int32_t current_screen_;
+    // todo can do function with changing screen
 };
