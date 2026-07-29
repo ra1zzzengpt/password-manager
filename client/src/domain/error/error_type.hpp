@@ -7,6 +7,7 @@ namespace err
         CreateDirectoryFailed,
         ParseFailed,
         FileStreamError,
+        DeleteFailed,
     };
 
     enum class SodiumError
@@ -15,5 +16,6 @@ namespace err
         OutOfMemory,
         BrokenCryptedData,
         SecretBoxOpenFailed,
+        PasswordIsTooShort,
     };
 }
