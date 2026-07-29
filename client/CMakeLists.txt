@@ -19,6 +19,8 @@ add_library(pwd-core STATIC
         src/crypto/helper/sodium_info.hpp
         src/ui/runner.cpp
         src/ui/runner.hpp
+        src/generate/generator.cpp
+        src/generate/generator.hpp
 )
 
 target_include_directories(
