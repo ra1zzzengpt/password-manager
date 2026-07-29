@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QStackedWidget>
 #include <QWidget>
 
 #include <controllers/main_controller.hpp>
@@ -14,7 +15,7 @@ public:
     PWScreen& operator=(const PWScreen&) = delete;
     PWScreen& operator=(PWScreen&&) = delete;
 
-    QWidget* build(QWidget* root, int32_t& screen_index);
+    QWidget* build(QWidget*& root, QStackedWidget*& stack);
 
 private:
     MainController& controller_;
