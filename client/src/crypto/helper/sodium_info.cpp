@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <crypto/helper/sodium_info.hpp>
 
 #include <sodium.h>
@@ -24,19 +25,19 @@ namespace crypto
         }
         SodiumInfo sodium_info;
         sodium_info.nonce.resize(crypto_secretbox_NONCEBYTES);
-        for (size_t i = 0; i < crypto_secretbox_NONCEBYTES; i++)
+        for (size_t i = 0; i < crypto_secretbox_NONCEBYTES; ++i)
         {
             sodium_info.nonce[i] = raw_crypted_bytes[i];
         }
         sodium_info.salt.resize(crypto_pwhash_SALTBYTES);
-        for (size_t i = crypto_secretbox_NONCEBYTES; i < crypto_pwhash_SALTBYTES + crypto_secretbox_NONCEBYTES; i++)
+        for (size_t i = crypto_secretbox_NONCEBYTES; i < crypto_pwhash_SALTBYTES + crypto_secretbox_NONCEBYTES; ++i)
         {
-            sodium_info.salt[i] = raw_crypted_bytes[i];
+            sodium_info.salt[i - crypto_secretbox_NONCEBYTES] = raw_crypted_bytes[i];
         }
         sodium_info.ciphertext.resize(raw_crypted_bytes.size() - crypto_secretbox_NONCEBYTES - crypto_pwhash_SALTBYTES);
-        for (size_t i = crypto_pwhash_SALTBYTES + crypto_secretbox_NONCEBYTES; i < raw_crypted_bytes.size(); i++)
+        for (size_t i = crypto_pwhash_SALTBYTES + crypto_secretbox_NONCEBYTES; i < raw_crypted_bytes.size(); ++i)
         {
-            sodium_info.ciphertext[i] = raw_crypted_bytes[i];
+            sodium_info.ciphertext[i - crypto_secretbox_NONCEBYTES - crypto_pwhash_SALTBYTES] = raw_crypted_bytes[i];
         }
         return sodium_info;
     }
