@@ -27,5 +27,5 @@ namespace cnt
     }
 
     inline std::filesystem::path logs = getAssetsBasePath() / "logs" / "pwd-session.log";
-    inline std::filesystem::path save = getAssetsBasePath() / "save" / "save.bin";
+    inline std::filesystem::path save = getAssetsBasePath() / "save" / "save.save";
 }
