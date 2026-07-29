@@ -26,17 +26,17 @@ namespace
         return result;
     }
 }
+
 MainScreen::MainScreen(MainController &controller) : controller_(controller) { }
 
-QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
+QWidget* MainScreen::build(QWidget*& root, QStackedWidget*& stack)
 {
     QWidget* widget = new QWidget(root);
 
     QVBoxLayout* layout = new QVBoxLayout(widget);
-    widget->setLayout(layout);
 
     // ------------ TOP LAYOUT -----------
-    QHBoxLayout* top_layout = new QHBoxLayout(widget);
+    QHBoxLayout* top_layout = new QHBoxLayout();
 
     QPushButton* exit_button = new QPushButton("Exit", widget);
 
@@ -61,7 +61,7 @@ QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
     lightFont.setPointSize(10);
 
     // ----------- LAYOUT FOR NAME ---------------
-    QHBoxLayout* name_layout = new QHBoxLayout(widget);
+    QHBoxLayout* name_layout = new QHBoxLayout();
     QLabel* name_label = new QLabel("Service name:", widget);
     QLineEdit* name_input = new QLineEdit(widget);
     name_input->setPlaceholderText("name...");
@@ -70,7 +70,7 @@ QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
     name_layout->addWidget(name_input);
 
     // ----------- LAYOUT FOR LOGIN ---------------
-    QHBoxLayout* login_layout = new QHBoxLayout(widget);
+    QHBoxLayout* login_layout = new QHBoxLayout();
     QLabel* login_label = new QLabel("Login:", widget);
     QLineEdit* login_input = new QLineEdit(widget);
     login_input->setPlaceholderText("login...");
@@ -79,10 +79,11 @@ QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
     login_layout->addWidget(login_input);
 
     // ----------- LAYOUT FOR PASSWORD (ADDING) ---------
-    QHBoxLayout* password_layout = new QHBoxLayout(widget);
+    QHBoxLayout* password_layout = new QHBoxLayout();
     QLabel* password_label = new QLabel("Password:", widget);
     QLineEdit* password_input = new QLineEdit(widget);
     password_input->setPlaceholderText("password...");
+    password_input->setEchoMode(QLineEdit::Password);
     password_label->setFont(boldFont);
     password_layout->addWidget(password_label);
     password_layout->addWidget(password_input);
@@ -94,10 +95,12 @@ QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
     generate_box->setValue(8);
     generate_box->setSingleStep(1);
     generate_box->setVisible(false);
+    password_layout->addWidget(generate_box);
 
     // ------------ CHECKBOX LAYOUT ------------------
-    QHBoxLayout* checkbox_layout = new QHBoxLayout(widget);
+    QHBoxLayout* checkbox_layout = new QHBoxLayout();
     QCheckBox* generating_checkbox = new QCheckBox("Generate");
+    checkbox_layout->addWidget(generating_checkbox);
     // TODO: MAKE MORE FLAGS
 
     // ------------ ADD BUTTON ------------------
@@ -122,7 +125,7 @@ QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
         root->close();
     });
 
-    QObject::connect(add_button, &QPushButton::clicked, [&]()->void
+    QObject::connect(add_button, &QPushButton::clicked, [name_input,login_input,password_input,generating_checkbox]()->void
     {
         if (!name_input->text().isEmpty()
             && !login_input->text().isEmpty()
@@ -135,6 +138,14 @@ QWidget *MainScreen::build(QWidget *root, int32_t screen_index)
             // todo add logic
         }
     });
+    layout->addLayout(top_layout);
+    layout->addLayout(name_layout);
+    layout->addLayout(login_layout);
+    layout->addLayout(password_layout);
+    layout->addLayout(checkbox_layout);
+    layout->addWidget(add_button);
+    layout->addWidget(scroll_area);
+    return widget;
 }
 
 QWidget* MainScreen::addService(const QString &name, const QString &login,const QString &password)
@@ -149,6 +160,8 @@ QWidget* MainScreen::addService(const QString &name, const QString &login,const 
     QLabel* login_label = new QLabel(login, widget);
 
     QLabel* password_label = new QLabel(cutString(QString(password.length(),'*')), widget);
+
+    // todo level of password
 
     QCheckBox* visible_checkbox = new QCheckBox("👁", widget);
 
