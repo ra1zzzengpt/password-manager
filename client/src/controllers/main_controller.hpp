@@ -4,7 +4,7 @@
 #include "storage_controller.hpp"
 
 
-class MainController
+class MainController final
 {
 
 public:
@@ -17,7 +17,9 @@ public:
 
     const std::vector<Service>& getServices();
 
-
+    std::expected<void, err::Error> setMasterPassword(const std::string& password);
+    std::expected<void, err::Error> loadStorage();
+    static std::expected<void, err::Error> deleteStorage();
 
 private:
     /*
