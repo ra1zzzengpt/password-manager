@@ -1,14 +1,28 @@
 #include "sodium.hpp"
+#include <cassert>
+#include <QDebug>
 
+#include "sodium/core.h"
 #include "sodium/crypto_pwhash.h"
 #include "sodium/crypto_secretbox.h"
 #include "sodium/randombytes.h"
 #include "sodium/utils.h"
 
 // todo add choose in settings level of crypt (for sensitive)
+namespace
+{
+    constexpr uint32_t kMinPasswordLength = 8;
+}
+
 
 namespace crypto
 {
+    Sodium::Sodium()
+    {
+        key_.resize(crypto_secretbox_KEYBYTES);
+        assert(sodium_init() >= 0);
+    }
+
     Sodium::~Sodium()
     {
         if (!key_.empty())
@@ -23,12 +37,11 @@ namespace crypto
 
     std::expected<void, err::Error> Sodium::keyGeneration(const std::vector<uint8_t> &salt)
     {
-        if (salt_.empty() || salt_ != salt)
+        if (salt.size() != crypto_pwhash_SALTBYTES)
         {
-            return {};
+            return std::unexpected{err::Error{err::SodiumError::BrokenCryptedData,"salt is broken."}};
         }
 
-        // todo MASTER PASSWORD FROM???
         const int32_t rc = crypto_pwhash(
             key_.data(),
             key_.size(),
@@ -48,7 +61,7 @@ namespace crypto
 
     std::expected<SodiumInfo, err::Error> Sodium::encrypt(const std::string &plaintext)
     {
-        if (salt_.empty())
+        if (salt_.empty() || key_.empty() || salt_.size() != crypto_pwhash_SALTBYTES)
         {
             std::vector<uint8_t> new_salt(crypto_pwhash_SALTBYTES);
             randombytes_buf(new_salt.data(), new_salt.size());
@@ -57,7 +70,6 @@ namespace crypto
                 return std::unexpected{gen_result.error()};
             }
         }
-
         SodiumInfo sodium_info;
         sodium_info.salt = salt_;
         sodium_info.nonce.resize(crypto_secretbox_NONCEBYTES);
@@ -81,7 +93,7 @@ namespace crypto
         {
             return std::unexpected{err::Error{err::SodiumError::BrokenCryptedData,"crypted data is broken."}};
         }
-        if (key_.empty() || salt_.empty() || salt_ != sodium_info.salt)
+        if (key_.empty() || salt_.empty() || salt_ != sodium_info.salt || salt_.size() != crypto_pwhash_SALTBYTES)
         {
             if (const std::expected<void,err::Error> gen_result = keyGeneration(sodium_info.salt); !gen_result.has_value())
             {
@@ -102,5 +114,15 @@ namespace crypto
             return std::unexpected{err::Error{err::SodiumError::SecretBoxOpenFailed,"Secret box open failed."}};
         }
         return std::string(reinterpret_cast<char*>(plaintext.data()), plaintext.size());
+    }
+
+    std::expected<void,err::Error> Sodium::setMasterPassword(const std::string &password)
+    {
+        if (password.length() < kMinPasswordLength)
+        {
+            return std::unexpected{err::Error{err::SodiumError::PasswordIsTooShort,"Password is too short."}};
+        }
+        master_password_ = password;
+        return {};
     }
 }
