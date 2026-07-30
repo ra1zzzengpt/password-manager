@@ -21,6 +21,7 @@ public:
     std::expected<void, err::Error> loadStorage();
     static std::expected<void, err::Error> deleteStorage();
 
+    std::expected<void, err::Error> addService(const Service& service);
 private:
     /*
      * Before adding tests (if they will?)

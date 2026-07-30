@@ -21,3 +21,8 @@ std::expected<void, err::Error> MainController::deleteStorage()
 {
     return StorageController::del();
 }
+
+std::expected<void, err::Error> MainController::addService(const Service &service)
+{
+    return storageController_.addService(service);
+}
