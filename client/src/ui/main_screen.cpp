@@ -10,6 +10,8 @@
 #include <QSpinBox>
 #include <QScrollArea>
 #include <QClipboard>
+#include <generate/generator.hpp>
+#include <utils/transform.hpp>
 
 namespace
 {
@@ -26,6 +28,7 @@ namespace
         return result;
     }
 }
+// 🗑️
 
 MainScreen::MainScreen(MainController &controller) : controller_(controller) { }
 
@@ -106,6 +109,8 @@ QWidget* MainScreen::build(QWidget*& root, QStackedWidget*& stack)
     // ------------ ADD BUTTON ------------------
     QPushButton* add_button = new QPushButton("Add Service", widget);
 
+    QLabel* error = new QLabel(widget);
+
     // ------------ SCROLL AREA -----------------
     QScrollArea* scroll_area = new QScrollArea(widget);
     scroll_area->setWidgetResizable(true);
@@ -113,11 +118,23 @@ QWidget* MainScreen::build(QWidget*& root, QStackedWidget*& stack)
     QVBoxLayout *containerLayout = new QVBoxLayout(container);
     containerLayout->setAlignment(Qt::AlignTop);
     containerLayout->setSpacing(5);
-    for (const Service& service: controller_.getServices())
-    {
-        containerLayout->addWidget(addService(QString(service.name.c_str()), QString(service.login.c_str()),
-                                              QString(service.password.c_str())));
-    }
+    scroll_area->setWidget(container);
+    const std::function<void()> update_area = [this, containerLayout]() {
+        QLayoutItem* item;
+        while ((item = containerLayout->takeAt(0)) != nullptr) {
+            delete item->widget();
+            delete item;
+        }
+
+        for (const Service& service : controller_.getServices()) {
+            QWidget* serviceWidget = addService(
+                QString(service.name.c_str()),
+                QString(service.login.c_str()),
+                QString(service.password.c_str())
+            );
+            containerLayout->addWidget(serviceWidget);
+        }
+    };
 
     // ------------- CONNECTS -------------
     QObject::connect(exit_button, &QPushButton::clicked, [&root]()->void
@@ -125,7 +142,13 @@ QWidget* MainScreen::build(QWidget*& root, QStackedWidget*& stack)
         root->close();
     });
 
-    QObject::connect(add_button, &QPushButton::clicked, [name_input,login_input,password_input,generating_checkbox]()->void
+    QObject::connect(generating_checkbox, &QCheckBox::toggled, [=](const bool checked)
+    {
+        password_input->setVisible(!checked);
+        generate_box->setVisible(checked);
+    });
+
+    QObject::connect(add_button, &QPushButton::clicked, [=,this]()->void
     {
         if (!name_input->text().isEmpty()
             && !login_input->text().isEmpty()
@@ -133,9 +156,21 @@ QWidget* MainScreen::build(QWidget*& root, QStackedWidget*& stack)
         {
             if (generating_checkbox->isChecked())
             {
-                // todo generate and add logic
+                const Service service{
+                    .name = name_input->text().toStdString(), .login = login_input->text().toStdString(),
+                    .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value())
+                };
+                if (const std::expected<void, err::Error> res_add = controller_.addService(service); !res_add.has_value())
+                {
+                    error->setText(QString(res_add.error().message.c_str()));
+                }
+            } else
+            {
+                if (const std::expected<void, err::Error> res_add = controller_.addService(Service{name_input->text().toStdString(),login_input->text().toStdString(),password_input->text().toStdString()}); !res_add.has_value())
+                {
+                    error->setText(QString(res_add.error().message.c_str()));
+                }
             }
-            // todo add logic
         }
     });
     layout->addLayout(top_layout);
@@ -144,7 +179,10 @@ QWidget* MainScreen::build(QWidget*& root, QStackedWidget*& stack)
     layout->addLayout(password_layout);
     layout->addLayout(checkbox_layout);
     layout->addWidget(add_button);
+    layout->addWidget(error);
     layout->addWidget(scroll_area);
+
+    update_area();
     return widget;
 }
 
@@ -167,7 +205,7 @@ QWidget* MainScreen::addService(const QString &name, const QString &login,const 
 
     QPushButton* copy_button = new QPushButton("Copy", widget);
 
-    QObject::connect(visible_checkbox, &QCheckBox::toggled, [&](const bool checked)
+    QObject::connect(visible_checkbox, &QCheckBox::toggled, [=](const bool checked)
     {
         if (checked)
         {
@@ -178,7 +216,7 @@ QWidget* MainScreen::addService(const QString &name, const QString &login,const 
         }
     });
 
-    QObject::connect(copy_button, &QPushButton::clicked, [password]()->void
+    QObject::connect(copy_button, &QPushButton::clicked, [=]()->void
     {
         QClipboard* clipboard = QApplication::clipboard();
         clipboard->setText(password);
