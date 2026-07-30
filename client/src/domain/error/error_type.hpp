@@ -18,4 +18,9 @@ namespace err
         SecretBoxOpenFailed,
         PasswordIsTooShort,
     };
+
+    enum class TransformError
+    {
+        TransformFailed,
+    };
 }
