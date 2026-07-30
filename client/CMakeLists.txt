@@ -21,6 +21,7 @@ add_library(pwd-core STATIC
         src/ui/runner.hpp
         src/generate/generator.cpp
         src/generate/generator.hpp
+        src/utils/transform.hpp
 )
 
 target_include_directories(
