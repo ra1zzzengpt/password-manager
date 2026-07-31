@@ -2,26 +2,26 @@
 
 #include <QWidget>
 #include <QStackedWidget>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <generate/generator.hpp>
 
 #include <controllers/main_controller.hpp>
 
-class MainScreen final
+class MainScreen final : public QWidget
 {
+    Q_OBJECT
+
 public:
-    explicit MainScreen(MainController& controller);
-    ~MainScreen() = default;
+    explicit MainScreen(MainController& controller, QWidget* parent = nullptr);
 
-    MainScreen(const MainScreen&) = delete;
-    MainScreen(MainScreen&&) = delete;
-
-    MainScreen& operator=(const MainScreen&) = delete;
-    MainScreen& operator=(MainScreen&&) = delete;
-
-    QWidget* build(QWidget*& root, QStackedWidget*& stack);
-
+public slots:
+    void refresh();
 private:
     MainController& controller_;
-
+    QVBoxLayout* container_layout_ = nullptr;
+    QLabel* error_ = nullptr;
+    GenerationLevel generation_level_;
     // todo error type
-    static QWidget* addService(const QString& name, const QString& login, const QString& password);
+    [[nodiscard]] QWidget* serviceToWidget(const QString& name, const QString& login, const QString& password, std::size_t index);
 };
