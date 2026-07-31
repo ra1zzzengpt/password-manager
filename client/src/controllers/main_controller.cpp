@@ -26,3 +26,13 @@ std::expected<void, err::Error> MainController::addService(const Service &servic
 {
     return storageController_.addService(service);
 }
+
+std::expected<void, err::Error> MainController::removeService(const std::size_t& index)
+{
+    return storageController_.removeService(index);
+}
+
+std::expected<void, err::Error> MainController::rewriteService(const std::string& name, const std::string& login, const std::string& password, const std::size_t& index)
+{
+    return storageController_.rewriteService(name, login, password, index);
+}
