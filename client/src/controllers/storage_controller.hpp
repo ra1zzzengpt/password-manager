@@ -1,5 +1,6 @@
 #pragma once
 #include <expected>
+#include <qstring.h>
 #include <vector>
 
 #include "crypto/sodium.hpp"
@@ -33,7 +34,9 @@ public:
     // --------------- SERVICES ----------------------
     std::expected<void, err::Error> addService(const Service& service);
 
-    std::expected<void, err::Error> removeService(/* todo index or service? */);
+    std::expected<void, err::Error> removeService(const std::size_t& index);
+
+    std::expected<void, err::Error> rewriteService(const std::string& name, const std::string& login, const std::string& password, const std::size_t& index);
 
     const std::vector<Service>& services();
 

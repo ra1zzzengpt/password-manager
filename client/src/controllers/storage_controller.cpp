@@ -12,7 +12,7 @@
 std::expected<void, err::Error> StorageController::save()
 {
     const std::filesystem::path path{cnt::save};
-    const std::filesystem::path temp_path{path.string() + ".temp"}; // todo lille rework for SAVING file will be temp
+    const std::filesystem::path temp_path{path.string() + ".temp"};
     if (!std::filesystem::exists(path))
     {
         std::error_code error_code;
@@ -136,4 +136,30 @@ std::expected<void, err::Error> StorageController::addService(const Service &ser
 std::expected<void,err::Error> StorageController::setMasterPassword(const std::string &password)
 {
     return sodium_.setMasterPassword(password);
+}
+
+std::expected<void, err::Error> StorageController::removeService(const std::size_t &index)
+{
+    const std::vector old_services{services_};
+    services_.erase(services_.begin() + static_cast<long>(index));
+    if (const std::expected<void,err::Error> save_result = save(); !save_result.has_value())
+    {
+        services_ = old_services;
+        return std::unexpected{save_result.error()};
+    }
+    return {};
+}
+
+std::expected<void, err::Error> StorageController::rewriteService(const std::string& name, const std::string& login, const std::string& password, const std::size_t& index)
+{
+    const std::vector old_services{services_};
+    services_[index].name = name;
+    services_[index].login = login;
+    services_[index].password = password;
+    if (const std::expected<void,err::Error> save_result = save(); !save_result.has_value())
+    {
+        services_ = old_services;
+        return std::unexpected{save_result.error()};
+    }
+    return {};
 }
