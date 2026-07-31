@@ -5,46 +5,42 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QDebug>
 #include <ui/pw_screen.hpp>
 
-PWScreen::PWScreen(MainController &controller) : controller_(controller) { }
-
-QWidget *PWScreen::build(QWidget*& root, QStackedWidget*& stack)
+PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
 {
-    QWidget *widget = new QWidget(root);
-    QVBoxLayout *layout = new QVBoxLayout(widget);
+    QVBoxLayout* layout = new QVBoxLayout(this);
 
-    QLabel* label = new QLabel("PASSWORD-MANAGER", widget);
+    QLabel* label = new QLabel("PASSWORD-MANAGER", this);
     label->setAlignment(Qt::AlignCenter);
     QFont font = label->font();
     font.setPointSize(24);
     font.setBold(true);
     label->setFont(font);
 
-    QLabel* entry_label = new QLabel("Enter your master-password:", widget);
+    QLabel* entry_label = new QLabel("Enter your master-password:", this);
     entry_label->setAlignment(Qt::AlignCenter);
     QFont entry_font = entry_label->font();
     entry_font.setBold(true);
     entry_label->setFont(entry_font);
 
-    QLineEdit* password_input = new QLineEdit(widget);
+    QLineEdit* password_input = new QLineEdit(this);
     password_input->setEchoMode(QLineEdit::Password);
     password_input->setPlaceholderText("Enter your password...");
 
     QHBoxLayout* hbox_button_layout = new QHBoxLayout();
-    QPushButton* exit_button = new QPushButton("Exit", widget);
-    QPushButton* next_button = new QPushButton("Next", widget);
-    QPushButton* delete_button = new QPushButton("Delete", widget);
+    QPushButton* exit_button = new QPushButton("Exit", this);
+    QPushButton* next_button = new QPushButton("Next", this);
+    QPushButton* delete_button = new QPushButton("Delete", this);
     hbox_button_layout->addWidget(exit_button);
     hbox_button_layout->addWidget(delete_button);
     hbox_button_layout->addWidget(next_button);
 
-    QLabel* error = new QLabel(widget);
+    QLabel* error = new QLabel(this);
     error->setAlignment(Qt::AlignCenter);
     error->setStyleSheet("color: red;");
 
-    QObject::connect(password_input,&QLineEdit::returnPressed,[=,this]()
+    connect(password_input,&QLineEdit::returnPressed,[=,this]()
     {
         error->setText(QString());
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
@@ -57,15 +53,15 @@ QWidget *PWScreen::build(QWidget*& root, QStackedWidget*& stack)
             error->setText(QString(load_result.error().message.c_str()));
             return;
         }
-        stack->setCurrentIndex(stack->currentIndex() + 1);
+        emit unlocked();
     });
 
-    QObject::connect(exit_button,&QPushButton::clicked,[&]()
+    connect(exit_button,&QPushButton::clicked,[&]()
     {
-        root->close();
+        window()->close();
     });
 
-    QObject::connect(delete_button,&QPushButton::clicked,[widget,error]()
+    connect(delete_button,&QPushButton::clicked,[this,error]()
     {
         QMessageBox* message_box = new QMessageBox();
         message_box->setWindowTitle("Deletion confirmation");
@@ -82,11 +78,11 @@ QWidget *PWScreen::build(QWidget*& root, QStackedWidget*& stack)
                 error->setText(QString(delete_res.error().message.c_str()));
                 return;
             }
-            QMessageBox::information(widget,"Information","Successful.");
+            QMessageBox::information(this,"Information","Successful.");
         }
     });
 
-    QObject::connect(next_button,&QPushButton::clicked,[=,this]()
+    connect(next_button,&QPushButton::clicked,[=,this]()
     {
         error->setText(QString());
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
@@ -99,7 +95,7 @@ QWidget *PWScreen::build(QWidget*& root, QStackedWidget*& stack)
             error->setText(QString(load_result.error().message.c_str()));
             return;
         }
-        stack->setCurrentIndex(stack->currentIndex() + 1);
+        emit unlocked();
     });
 
     layout->addStretch();
@@ -109,5 +105,4 @@ QWidget *PWScreen::build(QWidget*& root, QStackedWidget*& stack)
     layout->addLayout(hbox_button_layout);
     layout->addWidget(error);
     layout->addStretch();
-    return widget;
 }

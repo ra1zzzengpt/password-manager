@@ -5,18 +5,16 @@
 
 #include <controllers/main_controller.hpp>
 
-class PWScreen final
+class PWScreen final : public QWidget
 {
-public:
-    explicit PWScreen(MainController& controller);
-    ~PWScreen() = default;
-    PWScreen(const PWScreen&) = delete;
-    PWScreen(PWScreen&&) = delete;
-    PWScreen& operator=(const PWScreen&) = delete;
-    PWScreen& operator=(PWScreen&&) = delete;
+    Q_OBJECT
 
-    QWidget* build(QWidget*& root, QStackedWidget*& stack);
+    public:
+        explicit PWScreen(MainController& controller, QWidget* parent = nullptr);
 
-private:
-    MainController& controller_;
+    signals:
+        void unlocked();
+
+    private:
+        MainController& controller_;
 };
