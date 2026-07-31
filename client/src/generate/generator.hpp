@@ -2,7 +2,13 @@
 
 #include <string>
 #include <cstdint>
-// todo enum levels
+enum class GenerationLevel
+{
+    Low,
+    Medium,
+    High,
+    Maximum,
+};
 
 class Generator final
 {
