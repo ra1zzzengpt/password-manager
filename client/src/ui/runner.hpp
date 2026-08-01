@@ -1,5 +1,5 @@
 #pragma once
-#include "controllers/main_controller.hpp"
+#include <controllers/main_controller.hpp>
 
 class Runner final
 {
@@ -15,5 +15,4 @@ public:
 
 private:
     MainController& controller_;
-    // todo can do function with changing screen
 };

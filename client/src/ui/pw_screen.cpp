@@ -1,4 +1,3 @@
-#include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QFont>
@@ -71,7 +70,7 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
         message_box->setIcon(QMessageBox::Warning);
         message_box->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         message_box->setDefaultButton(QMessageBox::No);
-        if (int ans = message_box->exec(); ans == QMessageBox::Yes)
+        if (const int ans = message_box->exec(); ans == QMessageBox::Yes)
         {
             if (const std::expected<void, err::Error> delete_res = MainController::deleteStorage(); !delete_res.has_value())
             {

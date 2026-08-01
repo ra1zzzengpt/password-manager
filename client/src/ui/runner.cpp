@@ -1,7 +1,7 @@
-#include "runner.hpp"
+#include <ui/runner.hpp>
 #include <QApplication>
-#include "pw_screen.hpp"
-#include <QVBoxLayout>
+#include <QMessageBox>
+#include <ui/pw_screen.hpp>
 #include <QStackedWidget>
 
 #include "main_screen.hpp"
@@ -17,7 +17,7 @@ void Runner::run(int argc, char *argv[])
     MainScreen* main_screen = new MainScreen(controller_, stack);
 
     QWidget* window = new QWidget;
-    QVBoxLayout *mainLayout = new QVBoxLayout(window);
+    QVBoxLayout* mainLayout = new QVBoxLayout(window);
 
     window->setLayout(mainLayout);
 

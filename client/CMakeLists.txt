@@ -22,6 +22,9 @@ add_library(pwd-core STATIC
         src/generate/generator.cpp
         src/generate/generator.hpp
         src/utils/transform.hpp
+        src/constants/symbols.hpp
+        src/ui/settings_screen.cpp
+        src/ui/settings_screen.hpp
 )
 
 target_include_directories(

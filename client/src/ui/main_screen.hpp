@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QWidget>
-#include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <generate/generator.hpp>

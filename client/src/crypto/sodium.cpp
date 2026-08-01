@@ -1,5 +1,4 @@
-#include "sodium.hpp"
-#include <cassert>
+#include <crypto/sodium.hpp>
 #include <QDebug>
 
 #include "sodium/core.h"
@@ -8,7 +7,6 @@
 #include "sodium/randombytes.h"
 #include "sodium/utils.h"
 
-// todo add choose in settings level of crypt (for sensitive)
 namespace
 {
     constexpr uint32_t kMinPasswordLength = 8;
@@ -20,7 +18,11 @@ namespace crypto
     Sodium::Sodium()
     {
         key_.resize(crypto_secretbox_KEYBYTES);
-        assert(sodium_init() >= 0);
+
+        if (sodium_init() < 1)
+        {
+            throw err::Error{err::SodiumError::SodiumInitError, "sodium init error."};
+        }
     }
 
     Sodium::~Sodium()
@@ -93,13 +95,11 @@ namespace crypto
         {
             return std::unexpected{err::Error{err::SodiumError::BrokenCryptedData,"crypted data is broken."}};
         }
-        if (key_.empty() || salt_.empty() || salt_ != sodium_info.salt || salt_.size() != crypto_pwhash_SALTBYTES)
+        if (const std::expected<void,err::Error> gen_result = keyGeneration(sodium_info.salt); !gen_result.has_value())
         {
-            if (const std::expected<void,err::Error> gen_result = keyGeneration(sodium_info.salt); !gen_result.has_value())
-            {
-                return std::unexpected{gen_result.error()};
-            }
+            return std::unexpected{gen_result.error()};
         }
+
         std::vector<uint8_t> plaintext(sodium_info.ciphertext.size() - crypto_secretbox_MACBYTES);
 
         const int32_t rc = crypto_secretbox_open_easy(

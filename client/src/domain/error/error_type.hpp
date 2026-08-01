@@ -7,11 +7,13 @@ namespace err
         CreateDirectoryFailed,
         ParseFailed,
         FileStreamError,
+        RenameFailed,
         DeleteFailed,
     };
 
     enum class SodiumError
     {
+        SodiumInitError,
         InfoDataFailed,
         OutOfMemory,
         BrokenCryptedData,
@@ -22,5 +24,10 @@ namespace err
     enum class TransformError
     {
         TransformFailed,
+    };
+
+    enum class LogsError
+    {
+        InitError,
     };
 }

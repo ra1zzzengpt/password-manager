@@ -21,7 +21,7 @@ namespace cnt
                 }
                 current = current.parent_path();
             }
-            throw std::runtime_error("Can't find asssets directory! Current directory: " + std::filesystem::current_path().string());
+            throw std::runtime_error("Can't find assets directory! Current directory: " + std::filesystem::current_path().string());
         }();
         return base;
     }

@@ -46,7 +46,13 @@ std::expected<void, err::Error> StorageController::save()
         std::filesystem::remove(temp_path);
         return std::unexpected{err::Error{err::StorageError::FileStreamError, "Error with file stream: " + path.string()}};
     }
-    std::filesystem::rename(temp_path, path);
+    try
+    {
+        std::filesystem::rename(temp_path, path);
+    } catch (std::filesystem::filesystem_error& e)
+    {
+        return std::unexpected{err::Error{err::StorageError::RenameFailed, e.what()}};
+    }
     return {};
 }
 
