@@ -11,6 +11,7 @@
 #include <QScrollArea>
 #include <QClipboard>
 #include <QMessageBox>
+#include <QStandardItemModel>
 #include <generate/generator.hpp>
 #include <utils/transform.hpp>
 
@@ -29,135 +30,156 @@ namespace
         return result;
     }
 }
-// 🗑
 
 MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    // ------------ TOP LAYOUT -----------
+    // ------------------------- TOP LAYOUT -----------------------------------
     QHBoxLayout* top_layout = new QHBoxLayout();
 
     QPushButton* exit_button = new QPushButton("Exit", this);
 
     QLabel* label = new QLabel("password-manager", this);
+
     QFont font = label->font();
     font.setPointSize(24);
     font.setBold(true);
+
     label->setFont(font);
 
-    QPushButton* change_button = new QPushButton("Settings", this);
+    QPushButton* settings_button = new QPushButton("Settings", this);
 
     top_layout->addWidget(exit_button);
     top_layout->addStretch();
     top_layout->addWidget(label);
     top_layout->addStretch();
-    top_layout->addWidget(change_button);
-    // ------------- FONT --------------
+    top_layout->addWidget(settings_button);
+    // ------------------------------- FONT ---------------------------------
     QFont boldFont;
     boldFont.setBold(true);
 
-    QFont lightFont;
-    lightFont.setPointSize(10);
-
-    // ----------- LAYOUT FOR NAME ---------------
+    // ------------------------------- NAME LAYOUT  ------------------------------
     QHBoxLayout* name_layout = new QHBoxLayout();
+
     QLabel* name_label = new QLabel("Service name:", this);
+
     QLineEdit* name_input = new QLineEdit(this);
     name_input->setPlaceholderText("name...");
     name_label->setFont(boldFont);
+
     name_layout->addWidget(name_label);
     name_layout->addWidget(name_input);
 
     // ----------- LAYOUT FOR LOGIN ---------------
     QHBoxLayout* login_layout = new QHBoxLayout();
+
     QLabel* login_label = new QLabel("Login:", this);
+    login_label->setFont(boldFont);
+
     QLineEdit* login_input = new QLineEdit(this);
     login_input->setPlaceholderText("login...");
-    login_label->setFont(boldFont);
+
     login_layout->addWidget(login_label);
     login_layout->addWidget(login_input);
 
-    // ----------- LAYOUT FOR PASSWORD (ADDING) ---------
+    // ------------------------ PASSWORD LAYOUT -----------------------------
     QHBoxLayout* password_layout = new QHBoxLayout();
+
     QLabel* password_label = new QLabel("Password:", this);
+    password_label->setFont(boldFont);
     password_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
     QLineEdit* password_input = new QLineEdit(this);
     password_input->setPlaceholderText("password...");
     password_input->setEchoMode(QLineEdit::Password);
-    password_label->setFont(boldFont);
-    password_layout->addWidget(password_label);
-    password_layout->addWidget(password_input);
 
-    // ----------- LAYOUT FOR PASSWORD (GENERATING) -------
+    // gen box (visible false)
     QSpinBox* generate_box = new QSpinBox(this);
     generate_box->setMinimum(8);
     generate_box->setMaximum(500);
     generate_box->setValue(8);
     generate_box->setSingleStep(1);
     generate_box->setVisible(false);
+
+    password_layout->addWidget(password_label);
+    password_layout->addWidget(password_input);
     password_layout->addWidget(generate_box);
 
-    // ------------ CHECKBOX LAYOUT ------------------
-    QHBoxLayout* checkbox_layout = new QHBoxLayout();
-    QCheckBox* generating_checkbox = new QCheckBox("Generate");
+    // ------------------------ OPTIONS ----------------------------
+    QHBoxLayout* options = new QHBoxLayout();
 
-    // todo create work with generating level
+    QCheckBox* generating_checkbox = new QCheckBox("Generate");
+    generating_checkbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
     QComboBox* generation_combo_box = new QComboBox(this);
-    generation_combo_box->addItems({"Low", "Medium", "High", "Maximum"});
+    generation_combo_box->addItems({"Low", "Medium", "High"});
     generation_combo_box->setCurrentIndex(1);
 
-    checkbox_layout->addWidget(generating_checkbox);
-    checkbox_layout->addWidget(generation_combo_box);
+    options->addWidget(generating_checkbox);
+    options->addWidget(generation_combo_box);
     // TODO: MAKE MORE FLAGS
 
-    // ------------ ADD BUTTON ------------------
+    // ---------------------- ADD BUTTON ---------------------------
     QPushButton* add_button = new QPushButton("Add Service", this);
 
+    // ------------------------- ERROR LABEL -----------------------
     error_ = new QLabel(this);
 
-    // ------------ SCROLL AREA -----------------
+    // ------------------------- SCROLL AREA -----------------------------
     QScrollArea* scroll_area = new QScrollArea(this);
     scroll_area->setWidgetResizable(true);
+
     QWidget *container = new QWidget;
+
     container_layout_ = new QVBoxLayout(container);
     container_layout_->setAlignment(Qt::AlignTop);
     container_layout_->setSpacing(5);
+
     scroll_area->setWidget(container);
 
-    // ------------- CONNECTS -------------
+    // ----------------------------- CONNECTS -----------------------------
+
+    // EXIT
     connect(exit_button, &QPushButton::clicked, [this]()->void
     {
         window()->close();
     });
 
+    // GENERATION CHECKBOX
     connect(generating_checkbox, &QCheckBox::toggled, [=](const bool checked)
     {
         password_input->setVisible(!checked);
         generate_box->setVisible(checked);
     });
 
-    connect(generation_combo_box, &QComboBox::currentIndexChanged, [this](const int index)
+
+    // COMBO BOX
+    connect(generation_combo_box, &QComboBox::currentIndexChanged, [=,this](const int index)
     {
         switch (index)
         {
             case 0:
                 generation_level_ = GenerationLevel::Low;
+                generate_box->setMinimum(8);
+                generate_box->setValue(8);
                 break;
             case 1:
                 generation_level_ = GenerationLevel::Medium;
+                generate_box->setMinimum(8);
+                generate_box->setValue(8);
                 break;
             case 2:
                 generation_level_ = GenerationLevel::High;
-                break;
-            case 3:
-                generation_level_ = GenerationLevel::Maximum;
+                generate_box->setMinimum(16);
+                generate_box->setValue(16);
                 break;
             default:
                 generation_level_ = GenerationLevel::Medium;
         }
     });
 
+    // ADD BUTTON
     connect(add_button, &QPushButton::clicked, [=,this]()->void
     {
         if (!name_input->text().isEmpty()
@@ -168,7 +190,7 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
             {
                 const Service service{
                     .name = name_input->text().toStdString(), .login = login_input->text().toStdString(),
-                    .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value())
+                    .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value(), generation_level_)
                 };
                 if (const std::expected<void, err::Error> res_add = controller_.addService(service); !res_add.has_value())
                 {
@@ -190,23 +212,27 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
         refresh();
     });
 
-    connect(change_button, &QPushButton::clicked, [this]()->void
+    connect(settings_button, &QPushButton::clicked, [this]()->void
     {
-        QMessageBox::information(this,"Information","WORK IN PROGRESS");
+        settings();
     });
 
     layout->addLayout(top_layout);
+
     layout->addLayout(name_layout);
     layout->addLayout(login_layout);
     layout->addLayout(password_layout);
-    layout->addLayout(checkbox_layout);
+
+    layout->addLayout(options);
     layout->addWidget(add_button);
     layout->addWidget(error_);
+
     layout->addWidget(scroll_area);
 }
 
 void MainScreen::refresh()
 {
+    // deleting current widgets
     QLayoutItem* item;
     while ((item = container_layout_->takeAt(0)) != nullptr) {
         delete item->widget();
@@ -225,7 +251,6 @@ void MainScreen::refresh()
     }
 }
 
-// todo check const quality
 QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, const QString &password, const std::size_t index)
 {
     QWidget* widget = new QWidget;
@@ -233,12 +258,12 @@ QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, 
     QHBoxLayout* layout = new QHBoxLayout(widget);
     widget->setLayout(layout);
 
-    QLabel* label_label = new QLabel(name, widget);
+    QLabel* name_label = new QLabel(cutString(name), widget);
 
     QLineEdit* name_input = new QLineEdit(name, widget);
     name_input->setVisible(false);
 
-    QLabel* login_label = new QLabel(login, widget);
+    QLabel* login_label = new QLabel(cutString(login), widget);
 
     QLineEdit* login_input = new QLineEdit(login, widget);
     login_input->setVisible(false);
@@ -248,7 +273,18 @@ QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, 
     QLineEdit* password_input = new QLineEdit(password, widget);
     password_input->setVisible(false);
 
-    // todo level of password
+    QLabel* level_password = new QLabel(widget);
+    EntropyLevel level = Generator::Entropy(password.toStdString());
+    if (level == EntropyLevel::Low)
+    {
+        level_password->setText("🔴");
+    } else if (level == EntropyLevel::Medium)
+    {
+        level_password->setText("🟡");
+    } else
+    {
+        level_password->setText("🟢");
+    }
 
     QCheckBox* visible_checkbox = new QCheckBox("👁", widget);
 
@@ -269,33 +305,40 @@ QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, 
         }
     });
 
-    connect(rewrite_button, &QPushButton::clicked, [=, this] {
-    if (rewrite_button->text() == "✏") {
-        rewrite_button->setText("✓");
-        label_label->setVisible(false);
-        login_label->setVisible(false);
-        password_label->setVisible(false);
-        name_input->setVisible(true);
-        login_input->setVisible(true);
-        password_input->setVisible(true);
-        password_input->setEchoMode(QLineEdit::Normal);
-    }
-    else if (rewrite_button->text() == "✓") {
-        if (const auto res = controller_.rewriteService(
+    connect(rewrite_button, &QPushButton::clicked, [=, this]
+    {
+        if (rewrite_button->text() == "✏")
+        {
+            rewrite_button->setText("✓");
+
+            name_label->setVisible(false);
+            login_label->setVisible(false);
+            password_label->setVisible(false);
+
+            name_input->setVisible(true);
+            login_input->setVisible(true);
+            password_input->setVisible(true);
+
+            password_input->setEchoMode(QLineEdit::Normal);
+        } else if (rewrite_button->text() == "✓")
+        {
+            if (const auto res = controller_.rewriteService(
                 name_input->text().toStdString(),
                 login_input->text().toStdString(),
                 password_input->text().toStdString(),
-                index); !res.has_value()) {
-            error_->setText(QString(res.error().message.c_str()));
-            return;
+                index); !res.has_value())
+            {
+                error_->setText(QString(res.error().message.c_str()));
+                return;
+            }
+            refresh();
         }
-        refresh();
-    }
-});
+    });
 
     connect(delete_button, &QPushButton::clicked, [this, index]()
     {
-        if (const QMessageBox::StandardButton answer = QMessageBox::question(this,"Deleting","Are you sure you want to remove this service?"); answer == QMessageBox::Yes)
+        if (const QMessageBox::StandardButton answer = QMessageBox::question(
+            this, "Deleting", "Are you sure you want to remove this service?"); answer == QMessageBox::Yes)
         {
             if (const std::expected<void, err::Error> rm_res = controller_.removeService(index); !rm_res.has_value())
             {
@@ -312,13 +355,18 @@ QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, 
         clipboard->setText(password);
     });
 
-    layout->addWidget(label_label);
+    layout->addWidget(name_label);
     layout->addWidget(name_input);
+
     layout->addWidget(login_label);
     layout->addWidget(login_input);
+
     layout->addWidget(password_label);
     layout->addWidget(password_input);
+
     layout->addStretch();
+
+    layout->addWidget(level_password);
     layout->addWidget(visible_checkbox);
     layout->addWidget(rewrite_button);
     layout->addWidget(delete_button);

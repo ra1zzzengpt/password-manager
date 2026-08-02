@@ -13,6 +13,8 @@ class MainScreen final : public QWidget
 public:
     explicit MainScreen(MainController& controller, QWidget* parent = nullptr);
 
+signals:
+    void settings();
 public slots:
     void refresh();
 private:

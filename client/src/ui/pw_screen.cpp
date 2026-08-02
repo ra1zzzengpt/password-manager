@@ -72,7 +72,7 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
         message_box->setDefaultButton(QMessageBox::No);
         if (const int ans = message_box->exec(); ans == QMessageBox::Yes)
         {
-            if (const std::expected<void, err::Error> delete_res = MainController::deleteStorage(); !delete_res.has_value())
+            if (const std::expected<void, err::Error> delete_res = controller_.deleteStorage(); !delete_res.has_value())
             {
                 error->setText(QString(delete_res.error().message.c_str()));
                 return;
