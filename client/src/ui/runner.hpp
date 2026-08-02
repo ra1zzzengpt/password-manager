@@ -11,7 +11,7 @@ public:
     Runner(Runner &&) = delete;
     Runner &operator=(Runner &&) = delete;
 
-    void run(int argc, char *argv[]);
+    void run();
 
 private:
     MainController& controller_;
