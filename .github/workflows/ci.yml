@@ -1,35 +1,55 @@
-name: CI
+name: C++ CI
 
 on:
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches:
+      - main
+  workflow_dispatch:
 
-env:
-  CARGO_TERM_COLOR: always
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    name: Build & Check
+    name: Configure, build and test
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: get source
+        uses: actions/checkout@v6
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+      - name: install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            ccache \
+            ninja-build \
+            qt6-base-dev
+
+      - name: cache
+        uses: actions/cache@v4
         with:
-          components: rustfmt, clippy
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('CMakeLists.txt', 'client/CMakeLists.txt', 'client/src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
-      - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Check formatting
-        run: cargo fmt --check
-
-      - name: Clippy
-        run: cargo clippy -- -D warnings
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DSODIUM_DISABLE_TESTS=ON
 
       - name: Build
-        run: cargo build
+        run: cmake --build build --target password-manager --parallel 2
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
