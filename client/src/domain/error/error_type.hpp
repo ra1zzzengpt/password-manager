@@ -29,5 +29,11 @@ namespace err
     enum class LogsError
     {
         InitError,
+        CantCreateDirectory,
+    };
+
+    enum class SettingsError
+    {
+        PasswordsNotEqual,
     };
 }
