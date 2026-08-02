@@ -3,12 +3,14 @@
 
 #include "storage_controller.hpp"
 
+class Logs;
+
 
 class MainController final
 {
 
 public:
-    MainController();
+    explicit MainController(Logs& logs);
     ~MainController() = default;
     MainController(const MainController&) = delete;
     MainController(MainController&&) = delete;
@@ -18,8 +20,9 @@ public:
     const std::vector<Service>& getServices();
 
     std::expected<void, err::Error> setMasterPassword(const std::string& password);
+    std::expected<void, err::Error> changeMasterPassword(const std::string& old_password, const std::string& password);
     std::expected<void, err::Error> loadStorage();
-    static std::expected<void, err::Error> deleteStorage();
+    std::expected<void, err::Error> deleteStorage();
 
     std::expected<void, err::Error> addService(const Service& service);
     std::expected<void, err::Error> removeService(const std::size_t& index);

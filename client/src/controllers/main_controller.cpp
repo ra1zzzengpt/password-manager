@@ -1,6 +1,6 @@
 #include <controllers/main_controller.hpp>
 
-MainController::MainController() : storageController_(StorageController{}) {}
+MainController::MainController(Logs& logs) : storageController_(logs) {}
 
 const std::vector<Service>& MainController::getServices()
 {
@@ -12,6 +12,11 @@ std::expected<void, err::Error> MainController::setMasterPassword(const std::str
     return storageController_.setMasterPassword(password);
 }
 
+std::expected<void, err::Error> MainController::changeMasterPassword(const std::string& old_password, const std::string &password)
+{
+    return storageController_.changeMasterPassword(old_password, password);
+}
+
 std::expected<void, err::Error> MainController::loadStorage()
 {
     return storageController_.load();
@@ -19,7 +24,7 @@ std::expected<void, err::Error> MainController::loadStorage()
 
 std::expected<void, err::Error> MainController::deleteStorage()
 {
-    return StorageController::del();
+    return storageController_.del();
 }
 
 std::expected<void, err::Error> MainController::addService(const Service &service)

@@ -7,12 +7,14 @@
 #include "domain/service.hpp"
 #include "domain/error/error.hpp"
 
+class Logs;
+
 
 class StorageController final
 {
 public:
     // ----------------- OBJ --------------------------
-    StorageController() = default;
+    explicit StorageController(Logs& logs);
 
     ~StorageController() = default;
 
@@ -29,7 +31,7 @@ public:
 
     std::expected<void, err::Error> save();
 
-    static std::expected<void, err::Error> del();
+    std::expected<void, err::Error> del();
 
     // --------------- SERVICES ----------------------
     std::expected<void, err::Error> addService(const Service& service);
@@ -43,7 +45,9 @@ public:
     // --------------- SODIUM -----------------------
     std::expected<void,err::Error> setMasterPassword(const std::string& password);
 
+    std::expected<void,err::Error> changeMasterPassword(const std::string& old_password, const std::string& password);
 private:
     std::vector<Service> services_;
     crypto::Sodium sodium_;
+    Logs& logs_;
 };
