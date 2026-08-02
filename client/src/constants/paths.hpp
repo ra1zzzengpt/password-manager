@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <domain/error/error.hpp>
 
 namespace cnt
 {
@@ -21,11 +22,18 @@ namespace cnt
                 }
                 current = current.parent_path();
             }
-            throw std::runtime_error("Can't find assets directory! Current directory: " + std::filesystem::current_path().string());
+            throw err::Error{err::StorageError::CreateDirectoryFailed,"Can't find assets directory! Current directory: " + std::filesystem::current_path().string()};
         }();
         return base;
     }
 
-    inline std::filesystem::path logs = getAssetsBasePath() / "logs" / "pwd-session.log";
-    inline std::filesystem::path save = getAssetsBasePath() / "save" / "save.save";
+    inline std::filesystem::path logsPath()
+    {
+        return getAssetsBasePath() / "logs" / "pwd-session.log";
+    }
+
+    inline std::filesystem::path savePath()
+    {
+        return getAssetsBasePath() / "save" / "save.save";
+    }
 }

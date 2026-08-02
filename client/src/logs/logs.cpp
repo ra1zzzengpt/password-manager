@@ -6,6 +6,8 @@
 #include <chrono>
 #include <format>
 
+#include "domain/error/error.hpp"
+
 namespace
 {
     std::string string_factory(std::string_view lvl, std::string_view message, const std::source_location location)
@@ -17,20 +19,20 @@ namespace
     }
 }
 
-Logs::Logs() {
-    if (!std::filesystem::exists(cnt::logs))
+Logs::Logs()
+{
+    std::error_code error_code;
+    const std::filesystem::path log_path = cnt::logsPath();
+    std::filesystem::create_directories(log_path.parent_path(), error_code);
+    if (error_code)
     {
-        std::error_code error_code;
-        std::filesystem::create_directory(cnt::logs.parent_path(), error_code);
-        if (error_code)
-        { // todo throw custom errors for messagebox
-            throw std::runtime_error(error_code.message());
-        }
-        out_stream_ = std::ofstream(cnt::logs);
-        if (!out_stream_.is_open())
-        {
-            throw std::runtime_error("logs init failed");
-        }
+        throw err::Error{err::LogsError::CantCreateDirectory, "Can't create logs directory."};
+    }
+
+    out_stream_ = std::ofstream(log_path);
+    if (!out_stream_.is_open())
+    {
+        throw err::Error{err::LogsError::InitError, "Can't open the log file."};
     }
 }
 
@@ -40,15 +42,24 @@ Logs::~Logs()
     out_stream_.close();
 }
 
-void Logs::info_log(const std::string& message, std::source_location location)
+void Logs::write(const std::string_view level, const std::string_view message,
+                 const std::source_location location)
 {
-    out_stream_ << string_factory("INFO", message, location) << std::flush;
+    const std::scoped_lock lock{mutex_};
+    out_stream_ << string_factory(level, message, location) << std::flush;
 }
-void Logs::error_log(const std::string& message, std::source_location location)
+
+void Logs::info_log(const std::string_view message, const std::source_location location)
 {
-    out_stream_ << string_factory("ERROR", message, location) << std::flush;
+    write("INFO", message, location);
 }
-void Logs::warning_log(const std::string& message, std::source_location location)
+
+void Logs::error_log(const std::string_view message, const std::source_location location)
 {
-    out_stream_ << string_factory("WARNING", message, location) << std::flush;
+    write("ERROR", message, location);
+}
+
+void Logs::warning_log(const std::string_view message, const std::source_location location)
+{
+    write("WARNING", message, location);
 }
