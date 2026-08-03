@@ -3,53 +3,38 @@ name: C++ CI
 on:
   push:
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
-    name: Configure, build and test
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
 
     steps:
-      - name: get source
+      - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: install deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends \
-            ccache \
-            ninja-build \
-            qt6-base-dev
-
-      - name: cache
-        uses: actions/cache@v4
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
         with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('CMakeLists.txt', 'client/CMakeLists.txt', 'client/src/**') }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
+          version: "6.8.*"
 
       - name: Configure CMake
-        run: |
-          cmake -S . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DSODIUM_DISABLE_TESTS=ON
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DSODIUM_DISABLE_TESTS=ON
 
       - name: Build
-        run: cmake --build build --target password-manager --parallel 2
+        run: cmake --build build --config Release --parallel 2
 
       - name: Run tests
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --build-config Release --output-on-failure
