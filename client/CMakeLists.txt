@@ -41,6 +41,11 @@ target_link_libraries(pwd-core PRIVATE
 )
 add_executable(password-manager src/main.cpp)
 
+qt_add_resources(password-manager theme
+        PREFIX "/"
+        FILES assets/theme.qss
+)
+
 target_link_libraries(password-manager PRIVATE
         pwd-core
         Qt6::Core

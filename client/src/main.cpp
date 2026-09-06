@@ -1,5 +1,6 @@
 #include <QMessageBox>
 #include <QApplication>
+#include <QFile>
 #include <cstdlib>
 #include <memory>
 #include <exception>
@@ -21,6 +22,9 @@ namespace
 int main(int argc, char* argv[])
 {
     QApplication app{argc, argv};
+    if (QFile theme(":/assets/theme.qss"); theme.open(QFile::ReadOnly))
+        app.setStyleSheet(QString::fromUtf8(theme.readAll()));
+
     std::unique_ptr<Logs> logs;
 
     try
