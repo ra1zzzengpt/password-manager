@@ -17,7 +17,7 @@ No account. No cloud service. One encrypted vault protected by your master passw
 > [!WARNING]
 > Password Manager is under active development and has not undergone an independent security audit. Do not use it as the only copy of critical credentials, and keep backups of important data.
 
-![Password Manager main screen](img/img1.png)
+![Password Manager main screen](img/image1.png)
 
 ## What it does
 
@@ -92,7 +92,7 @@ The current version searches the working directory and its parent directories fo
 ## First launch
 
 <div align="center">
-  <img src="img/img.png" alt="Master-password screen" width="420">
+  <img src="img/image.png" alt="Master-password screen" width="420">
 </div>
 
 1. Enter a new master password containing at least 8 characters.
@@ -130,7 +130,7 @@ Each entry provides controls to:
 ### Change the master password
 
 <div align="center">
-  <img src="img/img2.png" alt="Change master password screen" width="720">
+  <img src="img/image2.png" alt="Change master password screen" width="720">
 </div>
 
 1. Open **Settings**.
