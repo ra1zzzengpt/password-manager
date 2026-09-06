@@ -10,6 +10,7 @@ SettingsScreen::SettingsScreen(MainController &controller, QWidget *parent) : QW
 
     QLabel* password_label = new QLabel("Change master-password",this);
     password_label->setAlignment(Qt::AlignCenter);
+    password_label->setObjectName("subTitle");
 
     QLineEdit* old_password = new QLineEdit(this);
     old_password->setPlaceholderText("old master-password...");
@@ -22,7 +23,7 @@ SettingsScreen::SettingsScreen(MainController &controller, QWidget *parent) : QW
     QLabel* error = new QLabel(this);
     error->setAlignment(Qt::AlignCenter);
     error->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    error->setStyleSheet("color: red;");
+    error->setObjectName("error");
 
     QHBoxLayout* low_layout = new QHBoxLayout();
 

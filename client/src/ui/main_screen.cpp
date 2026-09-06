@@ -41,6 +41,7 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     QPushButton* exit_button = new QPushButton("Exit", this);
 
     QLabel* label = new QLabel("password-manager", this);
+    label->setObjectName("subTitle");
 
     QFont font = label->font();
     font.setPointSize(24);
@@ -55,9 +56,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     top_layout->addWidget(label);
     top_layout->addStretch();
     top_layout->addWidget(settings_button);
-    // ------------------------------- FONT ---------------------------------
-    QFont boldFont;
-    boldFont.setBold(true);
 
     // ------------------------------- NAME LAYOUT  ------------------------------
     QHBoxLayout* name_layout = new QHBoxLayout();
@@ -66,7 +64,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
 
     QLineEdit* name_input = new QLineEdit(this);
     name_input->setPlaceholderText("name...");
-    name_label->setFont(boldFont);
 
     name_layout->addWidget(name_label);
     name_layout->addWidget(name_input);
@@ -75,7 +72,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     QHBoxLayout* login_layout = new QHBoxLayout();
 
     QLabel* login_label = new QLabel("Login:", this);
-    login_label->setFont(boldFont);
 
     QLineEdit* login_input = new QLineEdit(this);
     login_input->setPlaceholderText("login...");
@@ -87,7 +83,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     QHBoxLayout* password_layout = new QHBoxLayout();
 
     QLabel* password_label = new QLabel("Password:", this);
-    password_label->setFont(boldFont);
     password_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
     QLineEdit* password_input = new QLineEdit(this);
@@ -291,6 +286,7 @@ QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, 
     QPushButton* rewrite_button = new QPushButton("✏", widget);
 
     QPushButton* delete_button = new QPushButton("🗑", widget);
+    delete_button->setObjectName("dangerButton");
 
     QPushButton* copy_button = new QPushButton("Copy", widget);
 
@@ -310,6 +306,7 @@ QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, 
         if (rewrite_button->text() == "✏")
         {
             rewrite_button->setText("✓");
+            rewrite_button->setObjectName("apply");
 
             name_label->setVisible(false);
             login_label->setVisible(false);

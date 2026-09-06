@@ -21,7 +21,7 @@ private:
     MainController& controller_;
     QVBoxLayout* container_layout_ = nullptr;
     QLabel* error_ = nullptr;
-    GenerationLevel generation_level_;
+    GenerationLevel generation_level_{GenerationLevel::Medium};
     // todo error type
     [[nodiscard]] QWidget* serviceToWidget(const QString& name, const QString& login, const QString& password, std::size_t index);
 };
