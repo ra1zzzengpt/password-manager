@@ -115,7 +115,7 @@ namespace crypto
             crypto_secretbox_MACBYTES || sodium_info.salt.size() != crypto_pwhash_SALTBYTES)
         {
             logs_.warning_log("Encrypted payload validation failed");
-            return std::unexpected{err::Error{err::SodiumError::BrokenCryptedData,"crypted data is broken."}};
+            return std::unexpected{err::Error{err::SodiumError::BrokenCryptedData,"Save data is broken."}};
         }
         if (const std::expected<void,err::Error> gen_result = keyGeneration(sodium_info.salt); !gen_result.has_value())
         {
@@ -134,7 +134,7 @@ namespace crypto
         if (rc != 0)
         {
             logs_.warning_log("Storage payload authentication failed");
-            return std::unexpected{err::Error{err::SodiumError::SecretBoxOpenFailed,"Secret box open failed."}};
+            return std::unexpected{err::Error{err::SodiumError::SecretBoxOpenFailed,"Password does not match."}};
         }
         logs_.info_log("Storage payload decrypted");
         return std::string(reinterpret_cast<char*>(plaintext.data()), plaintext.size());
