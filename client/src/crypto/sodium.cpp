@@ -12,7 +12,6 @@ namespace
     constexpr uint32_t kMinPasswordLength = 8;
 }
 
-
 namespace crypto
 {
     Sodium::Sodium(Logs& logs) : logs_(logs)
