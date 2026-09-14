@@ -81,6 +81,8 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     QLineEdit* login_input = new QLineEdit(this);
     login_input->setPlaceholderText("login...");
 
+    // todo position check
+
     QComboBox* login_combo_box = new QComboBox(this);
     login_combo_box->setPlaceholderText("mail domain");
     login_combo_box->addItems({"@gmail.com","@protonmail.com","@yandex.ru","@outlook.com","@yahoo.com"});
