@@ -63,10 +63,15 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     QLabel* name_label = new QLabel("Service name:", this);
 
     QLineEdit* name_input = new QLineEdit(this);
-    name_input->setPlaceholderText("name...");
+    name_input->setPlaceholderText("service name...");
+
+    QComboBox* name_combo_box = new QComboBox(this);
+    name_combo_box->setPlaceholderText("domain");
+    name_combo_box->addItems({".com",".xyz",".ai",".cn",".ru"});
 
     name_layout->addWidget(name_label);
     name_layout->addWidget(name_input);
+    name_layout->addWidget(name_combo_box);
 
     // ----------- LAYOUT FOR LOGIN ---------------
     QHBoxLayout* login_layout = new QHBoxLayout();
@@ -76,8 +81,13 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     QLineEdit* login_input = new QLineEdit(this);
     login_input->setPlaceholderText("login...");
 
+    QComboBox* login_combo_box = new QComboBox(this);
+    login_combo_box->setPlaceholderText("mail domain");
+    login_combo_box->addItems({"@gmail.com","@protonmail.com","@yandex.ru","@outlook.com","@yahoo.com"});
+
     login_layout->addWidget(login_label);
     login_layout->addWidget(login_input);
+    login_layout->addWidget(login_combo_box);
 
     // ------------------------ PASSWORD LAYOUT -----------------------------
     QHBoxLayout* password_layout = new QHBoxLayout();
@@ -172,6 +182,16 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
             default:
                 generation_level_ = GenerationLevel::Medium;
         }
+    });
+
+    // todo парсить по строке при нажатии . вылезает список (кнопка скрытая смещается)
+
+    connect(name_combo_box, &QComboBox::currentIndexChanged, [=] {
+        name_input->setText(name_input->text() + name_combo_box->currentText());
+    });
+
+    connect(login_combo_box, &QComboBox::currentIndexChanged,[=] {
+        login_input->setText(login_input->text() + login_combo_box->currentText());
     });
 
     // ADD BUTTON
