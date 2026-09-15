@@ -5,6 +5,7 @@
 
 #include "main_screen.hpp"
 #include "settings_screen.hpp"
+#include "constants/paths.hpp"
 
 Runner::Runner(MainController &controller) : controller_(controller) {}
 
@@ -12,12 +13,16 @@ void Runner::run()
 {
     QStackedWidget *stack = new QStackedWidget;
 
-    PWScreen* pw_screen = new PWScreen(controller_, stack);
-    MainScreen* main_screen = new MainScreen(controller_, stack);
-    SettingsScreen* settings_screen = new SettingsScreen(controller_, stack);
-
     QWidget* window = new QWidget;
     QVBoxLayout* mainLayout = new QVBoxLayout(window);
+
+    QSoundEffect* type_sound = new QSoundEffect(window);
+    type_sound->setSource(QUrl::fromLocalFile((cnt::getAssetsBasePath()/"sounds"/"type.wav").c_str()));
+    // todo button press sounds
+
+    PWScreen* pw_screen = new PWScreen(controller_, type_sound, stack);
+    MainScreen* main_screen = new MainScreen(controller_, stack);
+    SettingsScreen* settings_screen = new SettingsScreen(controller_, stack);
 
     window->setLayout(mainLayout);
 

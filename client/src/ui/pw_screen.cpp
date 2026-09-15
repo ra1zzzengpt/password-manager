@@ -4,9 +4,12 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QUrl>
 #include <ui/pw_screen.hpp>
 
-PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
+PWScreen::PWScreen(MainController &controller,QSoundEffect* type_sound, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
@@ -34,6 +37,14 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
     QLabel* error = new QLabel(this);
     error->setAlignment(Qt::AlignCenter);
     error->setObjectName("error");
+
+    connect(password_input, &QLineEdit::textChanged, this, [=]() {
+        if (type_sound->isPlaying()) {
+            type_sound->stop();
+        }
+        type_sound->play();
+    });
+
 
     connect(password_input,&QLineEdit::returnPressed,[=,this]()
     {

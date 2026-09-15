@@ -31,11 +31,13 @@ target_include_directories(
         pwd-core PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Multimedia MultimediaWidgets)
 
 target_link_libraries(pwd-core PRIVATE
         Qt6::Core
         Qt6::Widgets
+        Qt6::Multimedia
+        Qt6::MultimediaWidgets
         sodium
         nlohmann_json::nlohmann_json
 )
@@ -50,4 +52,6 @@ target_link_libraries(password-manager PRIVATE
         pwd-core
         Qt6::Core
         Qt6::Widgets
+        Qt6::Multimedia
+        Qt6::MultimediaWidgets
 )

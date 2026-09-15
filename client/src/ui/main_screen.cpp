@@ -188,12 +188,36 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
 
     // todo парсить по строке при нажатии . вылезает список (кнопка скрытая смещается)
 
-    connect(name_combo_box, &QComboBox::currentIndexChanged, [=] {
-        name_input->setText(name_input->text() + name_combo_box->currentText());
+    connect(name_combo_box, &QComboBox::textActivated, [=] {
+        QString current_name = name_input->text();
+        if (name_input->text().endsWith("."))
+        {
+            current_name.removeLast();
+        }
+        name_input->setText(current_name + name_combo_box->currentText());
+        name_combo_box->setCurrentIndex(-1);
     });
 
     connect(login_combo_box, &QComboBox::currentIndexChanged,[=] {
-        login_input->setText(login_input->text() + login_combo_box->currentText());
+        QString current_login = login_input->text();
+        if (current_login.endsWith("@"))
+        {
+            current_login.removeLast();
+        }
+        login_input->setText(current_login + login_combo_box->currentText());
+        login_combo_box->setCurrentIndex(-1);
+    });
+
+    connect(login_input, &QLineEdit::textChanged, [=](const QString &text) {
+        if (text.endsWith("@")) {
+            login_combo_box->showPopup();
+        }
+    });
+
+    connect(name_input, &QLineEdit::textChanged, [=](const QString &text) {
+        if (text.endsWith(".")) {
+            name_combo_box->showPopup();
+        }
     });
 
     // ADD BUTTON
