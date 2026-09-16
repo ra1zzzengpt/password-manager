@@ -152,6 +152,11 @@ QMessageBox, QMessageBox QLabel {
     background-color: #202020;
 }
 
+QDialog {
+    border: 1px solid #555555;
+    border-radius: 10px
+}
+
 /*QToolTip {*/
 /*    padding: 5px 7px;*/
 /*    color: #ffffff;*/
