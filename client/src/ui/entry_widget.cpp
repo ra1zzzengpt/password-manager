@@ -7,9 +7,9 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QUrl>
-#include <ui/pw_screen.hpp>
+#include <ui/entry_widget.hpp>
 
-PWScreen::PWScreen(MainController &controller,QSoundEffect* type_sound, QWidget* parent) : QWidget(parent), controller_(controller)
+EntryWidget::EntryWidget(MainController &controller,QSoundEffect* type_sound, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 

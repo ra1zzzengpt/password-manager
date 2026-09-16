@@ -1,4 +1,4 @@
-#include "main_screen.hpp"
+#include "main_widget.hpp"
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -31,31 +31,9 @@ namespace
     }
 }
 
-MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
+MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
-
-    // ------------------------- TOP LAYOUT -----------------------------------
-    QHBoxLayout* top_layout = new QHBoxLayout();
-
-    QPushButton* exit_button = new QPushButton("Exit", this);
-
-    QLabel* label = new QLabel("password-manager", this);
-    label->setObjectName("subTitle");
-
-    QFont font = label->font();
-    font.setPointSize(24);
-    font.setBold(true);
-
-    label->setFont(font);
-
-    QPushButton* settings_button = new QPushButton("Settings", this);
-
-    top_layout->addWidget(exit_button);
-    top_layout->addStretch();
-    top_layout->addWidget(label);
-    top_layout->addStretch();
-    top_layout->addWidget(settings_button);
 
     // ------------------------------- NAME LAYOUT  ------------------------------
     QHBoxLayout* name_layout = new QHBoxLayout();
@@ -84,7 +62,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     // todo position check
 
     QComboBox* login_combo_box = new QComboBox(this);
-    login_combo_box->setPlaceholderText("mail domain");
     login_combo_box->addItems({"@gmail.com","@protonmail.com","@yandex.ru","@outlook.com","@yahoo.com"});
 
     login_layout->addWidget(login_label);
@@ -146,12 +123,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     scroll_area->setWidget(container);
 
     // ----------------------------- CONNECTS -----------------------------
-
-    // EXIT
-    connect(exit_button, &QPushButton::clicked, [this]()->void
-    {
-        window()->close();
-    });
 
     // GENERATION CHECKBOX
     connect(generating_checkbox, &QCheckBox::toggled, [=](const bool checked)
@@ -253,13 +224,6 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
         refresh();
     });
 
-    connect(settings_button, &QPushButton::clicked, [this]()->void
-    {
-        settings();
-    });
-
-    layout->addLayout(top_layout);
-
     layout->addLayout(name_layout);
     layout->addLayout(login_layout);
     layout->addLayout(password_layout);
@@ -271,7 +235,7 @@ MainScreen::MainScreen(MainController &controller, QWidget* parent) : QWidget(pa
     layout->addWidget(scroll_area);
 }
 
-void MainScreen::refresh()
+void MainWidget::refresh()
 {
     // deleting current widgets
     QLayoutItem* item;
@@ -292,7 +256,7 @@ void MainScreen::refresh()
     }
 }
 
-QWidget* MainScreen::serviceToWidget(const QString &name, const QString &login, const QString &password, const std::size_t index)
+QWidget* MainWidget::serviceToWidget(const QString &name, const QString &login, const QString &password, const std::size_t index)
 {
     QWidget* widget = new QWidget;
 

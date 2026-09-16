@@ -6,12 +6,12 @@
 
 #include <controllers/main_controller.hpp>
 
-class MainScreen final : public QWidget
+class MainWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainScreen(MainController& controller, QWidget* parent = nullptr);
+    explicit MainWidget(MainController& controller,QWidget* parent = nullptr);
 
 signals:
     void settings();

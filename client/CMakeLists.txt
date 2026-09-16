@@ -10,21 +10,21 @@ add_library(pwd-core STATIC
         src/domain/error/error_type.hpp
         src/domain/service.hpp
         src/domain/service.cpp
-        src/ui/pw_screen.cpp
-        src/ui/pw_screen.hpp
-        src/ui/main_screen.cpp
-        src/ui/main_screen.hpp
+        src/ui/entry_widget.cpp
+        src/ui/entry_widget.hpp
+        src/ui/main_widget.cpp
+        src/ui/main_widget.hpp
         src/constants/paths.hpp
         src/crypto/helper/sodium_info.cpp
         src/crypto/helper/sodium_info.hpp
-        src/ui/runner.cpp
-        src/ui/runner.hpp
         src/generate/generator.cpp
         src/generate/generator.hpp
         src/utils/transform.hpp
         src/constants/symbols.hpp
-        src/ui/settings_screen.cpp
-        src/ui/settings_screen.hpp
+        src/ui/settings_dialog.cpp
+        src/ui/settings_dialog.hpp
+        src/ui/window.cpp
+        src/ui/window.hpp
 )
 
 target_include_directories(
@@ -45,7 +45,7 @@ add_executable(password-manager src/main.cpp)
 
 qt_add_resources(password-manager theme
         PREFIX "/"
-        FILES assets/theme.qss
+        FILES assets/theme.qss assets/icons/settings.png assets/icons/exit.png assets/icons/mail.png
 )
 
 target_link_libraries(password-manager PRIVATE

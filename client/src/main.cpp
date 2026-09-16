@@ -5,7 +5,8 @@
 #include <memory>
 #include <exception>
 #include <logs/logs.hpp>
-#include <ui/runner.hpp>
+
+#include "ui/window.hpp"
 
 namespace
 {
@@ -23,7 +24,7 @@ int main(int argc, char* argv[])
 {
     QApplication app{argc, argv};
     if (QFile theme(":/assets/theme.qss"); theme.open(QFile::ReadOnly))
-        app.setStyleSheet(QString::fromUtf8(theme.readAll()));
+        app.setStyleSheet(QString(theme.readAll()));
 
     std::unique_ptr<Logs> logs;
 
@@ -33,9 +34,9 @@ int main(int argc, char* argv[])
         logs->info_log("Application startup");
 
         MainController mainController{*logs};
-        Runner runner{mainController};
-        runner.run();
-        const int exit_code = app.exec();
+        MainWindow* mainWindow = new MainWindow(mainController);
+        mainWindow->show();
+        const int exit_code = QApplication::exec();
 
         logs->info_log("Application shutdown");
         return exit_code;

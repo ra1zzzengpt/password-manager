@@ -2,23 +2,30 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <ui/settings_screen.hpp>
+#include <QGroupBox>
+#include <ui/settings_dialog.hpp>
 
-SettingsScreen::SettingsScreen(MainController &controller, QWidget *parent) : QWidget(parent), controller_(controller)
+SettingsDialog::SettingsDialog(MainController &controller, QWidget *parent) : QDialog(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    QLabel* password_label = new QLabel("Change master-password",this);
-    password_label->setAlignment(Qt::AlignCenter);
-    password_label->setObjectName("subTitle");
+    QGroupBox* password_group = new QGroupBox("Change master-password",this);
+    password_group->setAlignment(Qt::AlignCenter);
+
+    QVBoxLayout* password_group_layout = new QVBoxLayout(password_group);
 
     QLineEdit* old_password = new QLineEdit(this);
     old_password->setPlaceholderText("old master-password...");
+    old_password->setMinimumSize(QSize(450,14));
     old_password->setEchoMode(QLineEdit::Password);
+
 
     QLineEdit* new_password = new QLineEdit(this);
     new_password->setPlaceholderText("new master-password...");
     new_password->setEchoMode(QLineEdit::Password);
+
+    password_group_layout->addWidget(old_password);
+    password_group_layout->addWidget(new_password);
 
     QLabel* error = new QLabel(this);
     error->setAlignment(Qt::AlignCenter);
@@ -47,14 +54,16 @@ SettingsScreen::SettingsScreen(MainController &controller, QWidget *parent) : QW
         }
     });
 
-    connect(password_button, &QPushButton::clicked,new_password,&QLineEdit::returnPressed);
+    connect(password_button, &QPushButton::clicked,new_password, &QLineEdit::returnPressed);
 
-    connect(back_button, &QPushButton::clicked, [this]{done();});
+
+    connect(back_button, &QPushButton::clicked,[this]
+    {
+        this->close();
+    });
 
     layout->addStretch();
-    layout->addWidget(password_label);
-    layout->addWidget(old_password);
-    layout->addWidget(new_password);
+    layout->addWidget(password_group);
     layout->addWidget(error);
     layout->addLayout(low_layout);
     layout->addStretch();
