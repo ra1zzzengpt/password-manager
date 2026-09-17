@@ -41,3 +41,7 @@ std::expected<void, err::Error> MainController::rewriteService(const std::string
 {
     return storageController_.rewriteService(name, login, password, index);
 }
+
+std::uint32_t MainController::nextServiceIndex() {
+    return storageController_.nextServiceIndex();
+}

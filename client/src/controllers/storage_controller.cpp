@@ -224,3 +224,10 @@ std::expected<void, err::Error> StorageController::rewriteService(const std::str
     logs_.info_log("Credential record updated");
     return {};
 }
+
+std::uint32_t StorageController::nextServiceIndex() {
+    if (services_.empty()) {
+        return 0;
+    }
+    return services_.size() - 1;
+}

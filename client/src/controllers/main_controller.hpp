@@ -27,6 +27,7 @@ public:
     std::expected<void, err::Error> addService(const Service& service);
     std::expected<void, err::Error> removeService(const std::size_t& index);
     std::expected<void, err::Error> rewriteService(const std::string& name, const std::string& login, const std::string& password, const std::size_t& index);
+    std::uint32_t nextServiceIndex();
 private:
     /*
      * Before adding tests (if they will?)

@@ -42,6 +42,10 @@ public:
 
     const std::vector<Service>& services();
 
+    Service* findService(const Service& service);
+
+    std::uint32_t nextServiceIndex();
+
     // --------------- SODIUM -----------------------
     std::expected<void,err::Error> setMasterPassword(const std::string& password);
 
