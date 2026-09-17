@@ -17,6 +17,7 @@ signals:
     void settings();
 public slots:
     void refresh();
+    void addService(const Service& service);
 private:
     MainController& controller_;
     QVBoxLayout* container_layout_ = nullptr;
