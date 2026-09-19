@@ -6,11 +6,18 @@
 #include <expected>
 #include <domain/error/error.hpp>
 #include <fstream>
+#include <iostream>
 #include <logs/logs.hpp>
 
 StorageController::StorageController(Logs& logs) : sodium_(logs), logs_(logs)
 {
     logs_.info_log("Storage controller initialized");
+}
+
+std::uint32_t StorageController::takeNextId()
+{
+    id_ = ++id_;
+    return id_;
 }
 
 std::expected<void, err::Error> StorageController::save()
@@ -91,6 +98,8 @@ std::expected<void, err::Error> StorageController::load()
         std::streamsize file_size{file.tellg()};
         file.seekg(0, std::ios::beg);
 
+        // todo bug whats if file will be VERY BIG?
+
         std::vector<uint8_t> data(file_size);
         file.read(reinterpret_cast<std::istream::char_type *>(data.data()), file_size);
         const std::expected<crypto::SodiumInfo, err::Error> import_result = crypto::import(data);
@@ -118,7 +127,7 @@ std::expected<void, err::Error> StorageController::load()
     } else
     {
         logs_.info_log("Storage file is missing or empty; initializing new storage");
-        services_ = std::vector<Service>{};
+        services_ = std::unordered_map<std::uint32_t, Service>{};
     }
     return save();
 }
@@ -144,16 +153,17 @@ std::expected<void, err::Error> StorageController::del()
     return {};
 }
 
-const std::vector<Service>& StorageController::services()
+const std::unordered_map<std::uint32_t, Service>& StorageController::services()
 {
     return services_;
 }
 
-std::expected<void, err::Error> StorageController::addService(const Service &service)
+std::expected<std::uint32_t, err::Error> StorageController::addService(const Service &service)
 {
     logs_.info_log("Adding credential record");
-    const std::vector old_services{services_};
-    services_.push_back(service);
+    const std::unordered_map old_services{services_};
+    std::uint32_t id = takeNextId();
+    services_.emplace(id,service);
     if (const std::expected<void,err::Error> save_result = save(); !save_result.has_value())
     {
         services_ = old_services;
@@ -161,7 +171,7 @@ std::expected<void, err::Error> StorageController::addService(const Service &ser
         return std::unexpected{save_result.error()};
     }
     logs_.info_log("Credential record added");
-    return {};
+    return {id};
 }
 
 std::expected<void,err::Error> StorageController::setMasterPassword(const std::string &password)
@@ -196,8 +206,8 @@ std::expected<void, err::Error> StorageController::changeMasterPassword(const st
 std::expected<void, err::Error> StorageController::removeService(const std::size_t &index)
 {
     logs_.info_log("Removing credential record");
-    const std::vector old_services{services_};
-    services_.erase(services_.begin() + static_cast<long>(index));
+    const std::unordered_map old_services{services_};
+    services_.erase(index);
     if (const std::expected<void,err::Error> save_result = save(); !save_result.has_value())
     {
         services_ = old_services;
@@ -208,13 +218,13 @@ std::expected<void, err::Error> StorageController::removeService(const std::size
     return {};
 }
 
-std::expected<void, err::Error> StorageController::rewriteService(const std::string& name, const std::string& login, const std::string& password, const std::size_t& index)
+std::expected<void, err::Error> StorageController::rewriteService(const Service& service, const std::size_t& index)
 {
     logs_.info_log("Updating credential record");
-    const std::vector old_services{services_};
-    services_[index].name = name;
-    services_[index].login = login;
-    services_[index].password = password;
+    const std::unordered_map old_services{services_};
+    services_[index].name = service.name;
+    services_[index].login = service.login;
+    services_[index].password = service.password;
     if (const std::expected<void,err::Error> save_result = save(); !save_result.has_value())
     {
         services_ = old_services;
