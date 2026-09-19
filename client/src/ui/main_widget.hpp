@@ -16,13 +16,13 @@ public:
 signals:
     void settings();
 public slots:
-    void refresh();
-    void addService(const Service& service);
+    void load_all();
+    void addService(const Service& service, std::uint32_t id);
 private:
     MainController& controller_;
     QVBoxLayout* container_layout_ = nullptr;
     QLabel* error_ = nullptr;
     GenerationLevel generation_level_{GenerationLevel::Medium};
     // todo error type
-    [[nodiscard]] QWidget* serviceToWidget(const QString& name, const QString& login, const QString& password, std::size_t index);
+    [[nodiscard]] QWidget* serviceToWidget(const Service& service, std::uint32_t id);
 };

@@ -11,10 +11,14 @@
 class QCustomListWidget : public QWidget {
     Q_OBJECT
 public:
-    explicit QCustomListWidget(const QIcon& icon, QWidget* parent = nullptr);
+    explicit QCustomListWidget(QWidget* parent = nullptr);
 
     void addOption(const std::string& text);
     void addOptions(const std::vector<std::string>& options);
+
+    void setIcon(QIcon& icon);
+public slots:
+    void showList();
 signals:
     void optionSelected(const QString& text);
 private slots:

@@ -18,7 +18,7 @@ class AddServiceDialog : public QDialog {
 public:
     explicit AddServiceDialog(MainController& controller, QWidget* parent = nullptr);
 signals:
-    void addService(Service& service);
+    void addService(Service& service, std::uint32_t id);
 private:
     GenerationLevel generation_level_{GenerationLevel::Medium};
     MainController& controller_;

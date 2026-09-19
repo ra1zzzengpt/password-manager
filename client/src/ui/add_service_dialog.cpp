@@ -1,6 +1,7 @@
 #include "add_service_dialog.hpp"
 
 #include <expected>
+#include <iostream>
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QHBoxLayout>
@@ -44,18 +45,26 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
 
     QVBoxLayout* group_layout = new QVBoxLayout(group_box);
 
+    QIcon web_icon = QIcon(":assets/icons/web.png");
     QIcon mail_icon = QIcon(":assets/icons/mail.png");
 
     // ------------------------------- NAME LAYOUT  ------------------------------
     QHBoxLayout* name_layout = new QHBoxLayout();
 
     QLabel* name_label = new QLabel("Service name:", this);
+    name_label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
     QLineEdit* name_input = new QLineEdit(this);
     name_input->setPlaceholderText("service name...");
+    name_input->setMinimumSize(250,16);
+    name_input->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    QCustomListWidget* custom_list_widget = new QCustomListWidget(mail_icon,this);
+    QCustomListWidget* custom_list_widget = new QCustomListWidget(this);
     custom_list_widget->addOptions({".com",".xyz",".ai",".cn",".ru"});
+    custom_list_widget->setIcon(web_icon);
+    // custom_list_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    custom_list_widget->setMaximumSize(50,50);
+    std::cout << custom_list_widget->size().width() << " " << custom_list_widget->size().height();
 
     name_layout->addWidget(name_label);
     name_layout->addWidget(name_input);
@@ -71,13 +80,13 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
 
     // todo position check
 
-    QComboBox* login_combo_box = new QComboBox(this);
-    login_combo_box->setPlaceholderText("mail");
-    login_combo_box->addItems({"@gmail.com","@protonmail.com","@yandex.ru","@outlook.com","@yahoo.com"});
+    QCustomListWidget* custom_list_widget_login = new QCustomListWidget(this);
+    custom_list_widget_login->addOptions({"@gmail.com","@protonmail.com","@yandex.ru","@outlook.com","@yahoo.com"});
+    custom_list_widget_login->setIcon(mail_icon);
 
     login_layout->addWidget(login_label);
     login_layout->addWidget(login_input);
-    login_layout->addWidget(login_combo_box);
+    login_layout->addWidget(custom_list_widget_login);
 
     // ------------------------ PASSWORD LAYOUT -----------------------------
     QHBoxLayout* password_layout = new QHBoxLayout();
@@ -87,6 +96,7 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
 
     QLineEdit* password_input = new QLineEdit(this);
     password_input->setPlaceholderText("password...");
+    password_input->setMinimumSize(QSize(350,16));
     password_input->setEchoMode(QLineEdit::Password);
 
     // gen box (visible false)
@@ -116,14 +126,20 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
     // TODO: MAKE MORE FLAGS
 
     // ---------------------- ADD BUTTON ---------------------------
+    QHBoxLayout* low_layout = new QHBoxLayout();
+
+    QPushButton* cancel_button = new QPushButton("Cancel", this);
     QPushButton* add_button = new QPushButton("Add Service", this);
+
+    low_layout->addWidget(cancel_button);
+    low_layout->addWidget(add_button);
 
     group_layout->addLayout(name_layout);
     group_layout->addLayout(login_layout);
     group_layout->addLayout(password_layout);
 
     group_layout->addLayout(options);
-    group_layout->addWidget(add_button);
+    group_layout->addLayout(low_layout);
 
     layout->addWidget(group_box);
 
@@ -174,27 +190,26 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
         name_input->setText(current_name + text);
     });
 
-    connect(login_combo_box, &QComboBox::currentIndexChanged,[=] {
+    connect(custom_list_widget_login, &QCustomListWidget::optionSelected,[=](const QString& text) {
         QString current_login = login_input->text();
         if (current_login.endsWith("@"))
         {
             current_login.removeLast();
         }
-        login_input->setText(current_login + login_combo_box->currentText());
-        login_combo_box->setCurrentIndex(-1);
+        login_input->setText(current_login + text);
     });
 
     connect(login_input, &QLineEdit::textChanged, [=](const QString &text) {
         if (text.endsWith("@")) {
-            login_combo_box->showPopup();
+            custom_list_widget_login->showList();
         }
     });
 
-    // connect(name_input, &QLineEdit::textChanged, [=](const QString &text) {
-    //     if (text.endsWith(".")) {
-    //         name_combo_box->showPopup();
-    //     }
-    // });
+    connect(name_input, &QLineEdit::textChanged, [=](const QString &text) {
+        if (text.endsWith(".")) {
+            custom_list_widget->showList();
+        }
+    });
 
     // ADD BUTTON
     connect(add_button, &QPushButton::clicked, [=,this]()->void
@@ -210,24 +225,34 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
                     .name = name_input->text().toStdString(), .login = login_input->text().toStdString(),
                     .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value(), generation_level_)
                 };
-                if (const std::expected<void, err::Error> res_add = controller_.addService(service); !res_add.has_value())
+                if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
                 {
                     QMessageBox::warning(this, "Save Error",QString(res_add.error().message.c_str()));
                     return;
+                } else
+                {
+                    addService(service, res_add.value());
                 }
             } else
             {
                 service = Service{name_input->text().toStdString(),login_input->text().toStdString(),password_input->text().toStdString()};
-                if (const std::expected<void, err::Error> res_add = controller_.addService(service); !res_add.has_value())
+                if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
                 {
                     QMessageBox::warning(this, "Save Error",QString(res_add.error().message.c_str()));
                     return;
+                } else
+                {
+                    addService(service, res_add.value());
                 }
             }
             name_input->clear();
             login_input->clear();
             password_input->clear();
-            addService(service);
+            this->close();
         }
+    });
+    connect(cancel_button, &QPushButton::clicked, [=,this]()->void
+    {
+        this->close();
     });
 }

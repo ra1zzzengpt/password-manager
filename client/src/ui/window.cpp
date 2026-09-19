@@ -60,7 +60,7 @@ MainWindow::MainWindow(MainController &controller)
     stack->addWidget(entry_widget);
     stack->addWidget(main_widget);
 
-    connect(entry_widget, &EntryWidget::unlocked, main_widget, &MainWidget::refresh);
+    connect(entry_widget, &EntryWidget::unlocked, main_widget, &MainWidget::load_all);
 
     connect(entry_widget, &EntryWidget::unlocked, stack, [stack, main_widget]()
     {

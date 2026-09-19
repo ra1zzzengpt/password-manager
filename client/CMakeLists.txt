@@ -31,6 +31,7 @@ add_library(pwd-core STATIC
         src/ui/current_service_dialog.hpp
         src/ui/custom_list_widget.cpp
         src/ui/custom_list_widget.hpp
+        src/ui/custom_widgets/service_card_widget.cpp
 )
 
 target_include_directories(
@@ -53,7 +54,7 @@ qt_add_resources(password-manager theme
         PREFIX "/"
         FILES assets/theme.qss assets/icons/settings.png assets/icons/exit.png assets/icons/mail.png
         assets/icons/edit.png assets/icons/apply.png assets/icons/delete.png assets/icons/copy.png
-        assets/icons/add.png
+        assets/icons/add.png assets/icons/web.png assets/icons/copy_login.png assets/icons/copy_password.png
 )
 
 target_link_libraries(password-manager PRIVATE
