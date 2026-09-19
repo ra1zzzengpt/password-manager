@@ -157,6 +157,21 @@ QDialog {
     border-radius: 10px
 }
 
+QListWidget {
+    border: 1px solid #555555;
+    border-radius: 5px;
+    background-color: #202020;
+}
+
+QListWidget::item:selected {
+    background-color: #555555;
+}
+
+QServiceCardWidget {
+    border: 1px solid #555555;
+    border-radius: 5px;
+}
+
 /*QToolTip {*/
 /*    padding: 5px 7px;*/
 /*    color: #ffffff;*/
