@@ -36,4 +36,9 @@ namespace err
     {
         PasswordsNotEqual,
     };
+
+    enum class SoundError
+    {
+        SoundNotExist,
+    };
 }

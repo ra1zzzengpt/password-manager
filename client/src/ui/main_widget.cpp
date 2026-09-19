@@ -82,9 +82,23 @@ QWidget* MainWidget::serviceToWidget(const Service& service, const std::uint32_t
     QIcon copy_password_icon = QIcon(":/assets/icons/copy_password.png");
     QServiceCardWidget* serviceWidget = new QServiceCardWidget(service,id,copy_login_icon,copy_password_icon,edit_icon,this);
 
-    connect(serviceWidget, &QServiceCardWidget::serviceClicked, [](std::uint32_t id)
+    connect(serviceWidget, &QServiceCardWidget::loginCopyButtonClicked, [this](const std::uint32_t& id) {
+        QClipboard* clipboard = QApplication::clipboard();
+        clipboard->setText(controller_.getServices().at(id).login.c_str());
+    });
+
+    connect(serviceWidget, &QServiceCardWidget::passwordCopyButtonClicked, [this](const std::uint32_t& id) {
+        QClipboard* clipboard = QApplication::clipboard();
+        clipboard->setText(controller_.getServices().at(id).password.c_str());
+    });
+
+    connect(serviceWidget, &QServiceCardWidget::moreInfoButtonClicked, [this](const std::uint32_t& id) {
+        // todo add more info call
+    });
+
+    connect(serviceWidget, &QServiceCardWidget::serviceClicked, [this](const std::uint32_t& id)
     {
-        std::cout << id << std::endl;// todo add more info call
+        // todo add more info call
     });
     return serviceWidget;
 }

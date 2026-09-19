@@ -4,6 +4,7 @@
 
 #include "window.hpp"
 
+#include <QMessageBox>
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -50,11 +51,7 @@ MainWindow::MainWindow(MainController &controller)
 
     QStackedWidget* stack = new QStackedWidget(this);
 
-    QSoundEffect* type_sound = new QSoundEffect(this);
-    type_sound->setSource(QUrl::fromLocalFile((cnt::getAssetsBasePath()/"sounds"/"type.wav").c_str()));
-    type_sound->setVolume(0.2);
-
-    EntryWidget* entry_widget = new EntryWidget(controller,type_sound,stack);
+    EntryWidget* entry_widget = new EntryWidget(controller,stack);
     MainWidget* main_widget = new MainWidget(controller,stack); // todo to signals work
 
     stack->addWidget(entry_widget);
@@ -75,7 +72,11 @@ MainWindow::MainWindow(MainController &controller)
     connect(settings_button, &QPushButton::clicked, [&]()->void
     {
         SettingsDialog* dialog = new SettingsDialog(controller,this);
-        dialog->exec();
+        if (auto res = SoundController::playSound(SoundType::Click); res.has_value()) {
+            dialog->exec();
+        } else {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
     });
 
     rootLayout->addLayout(top_layout);

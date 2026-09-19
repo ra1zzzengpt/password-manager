@@ -3,6 +3,7 @@
 #include <QWidget>
 
 #include "controllers/main_controller.hpp"
+#include "controllers/sound_controller.hpp"
 
 class MainWindow : public QWidget
 {

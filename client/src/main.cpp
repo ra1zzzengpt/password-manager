@@ -6,6 +6,8 @@
 #include <exception>
 #include <logs/logs.hpp>
 
+#include "constants/paths.hpp"
+#include "controllers/sound_controller.hpp"
 #include "ui/window.hpp"
 
 namespace

@@ -9,7 +9,7 @@
 #include <QUrl>
 #include <ui/entry_widget.hpp>
 
-EntryWidget::EntryWidget(MainController &controller,QSoundEffect* type_sound, QWidget* parent) : QWidget(parent), controller_(controller)
+EntryWidget::EntryWidget(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
@@ -39,10 +39,7 @@ EntryWidget::EntryWidget(MainController &controller,QSoundEffect* type_sound, QW
     error->setObjectName("error");
 
     connect(password_input, &QLineEdit::textChanged, this, [=]() {
-        if (type_sound->isPlaying()) {
-            type_sound->stop();
-        }
-        type_sound->play();
+        // todo type sound
     });
 
 
