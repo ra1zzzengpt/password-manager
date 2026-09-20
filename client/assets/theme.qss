@@ -172,6 +172,30 @@ QServiceCardWidget {
     border-radius: 5px;
 }
 
+QServiceCardWidget:hover {
+    background-color: #202020
+}
+
+QSlider::groove:horizontal {
+    height: 10px;
+    background: #2a2a2a;
+    border: 1px solid #4a4a4a;
+    border-radius: 3px;
+}
+
+QSlider::sub-page:horizontal {
+    background: #202020;
+    border: 1px solid #555555;
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background: #555555;
+    border: 1px solid #606060;
+   width: 10px;
+   height: 10px;
+}
+
 /*QToolTip {*/
 /*    padding: 5px 7px;*/
 /*    color: #ffffff;*/
