@@ -34,6 +34,8 @@ add_library(pwd-core STATIC
         src/ui/custom_widgets/service_card_widget.cpp
         src/controllers/sound_controller.cpp
         src/controllers/sound_controller.hpp
+        src/ui/custom_dialogs/more_info_dialog.cpp
+        src/ui/custom_dialogs/more_info_dialog.hpp
 )
 
 target_include_directories(
@@ -57,7 +59,7 @@ qt_add_resources(password-manager theme
         FILES assets/theme.qss assets/icons/settings.png assets/icons/exit.png assets/icons/mail.png
         assets/icons/edit.png assets/icons/apply.png assets/icons/delete.png assets/icons/copy.png
         assets/icons/add.png assets/icons/web.png assets/icons/copy_login.png assets/icons/copy_password.png
-        assets/sounds/click.wav assets/sounds/notification.wav
+        assets/sounds/click.wav assets/sounds/notification.wav assets/sounds/type.wav assets/icons/eye.png
 )
 
 target_link_libraries(password-manager PRIVATE
