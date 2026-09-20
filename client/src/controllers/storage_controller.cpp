@@ -119,6 +119,8 @@ std::expected<void, err::Error> StorageController::load()
         try
         {
             services_ = nlohmann::json::parse(decrypt_result.value());
+            // bug with emplace fixed
+            id_ = id_ + services_.size();
         } catch (...)
         {
             logs_.error_log("Decrypted storage deserialization failed");

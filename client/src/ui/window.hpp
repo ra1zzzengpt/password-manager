@@ -10,7 +10,10 @@ class MainWindow : public QWidget
     Q_OBJECT
 
 public:
-    MainWindow(MainController& controller);
+    MainWindow(MainController& controller, SoundController& sound_controller);
+private:
+    MainController& controller_;
+    SoundController& sound_controller_;
 };
 
 #endif

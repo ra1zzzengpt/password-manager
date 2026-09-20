@@ -4,14 +4,15 @@
 
 #ifndef PASSWORD_MANAGER_SOUND_CONTROLLER_HPP
 #define PASSWORD_MANAGER_SOUND_CONTROLLER_HPP
+
 #include <expected>
 #include <QSoundEffect>
-#include <unordered_map>
 
 #include "domain/error/error.hpp"
 
-enum class SoundType {
-    Input,
+enum class SoundType
+{
+    Type,
     Notification,
     Click,
 };
@@ -19,8 +20,15 @@ enum class SoundType {
 
 class SoundController {
 public:
-    explicit SoundController() = default;
-    static std::expected<void, err::Error> playSound(const SoundType& sound);
+    SoundController();
+    [[nodiscard]] std::expected<void, err::Error> playSound(const SoundType& sound) const;
+    std::uint32_t getVolume() const;
+    void setVolume(std::uint32_t volume);
+private:
+    std::float_t volume_;
+    QSoundEffect* type_;
+    QSoundEffect* notification_;
+    QSoundEffect* click_;
 };
 
 

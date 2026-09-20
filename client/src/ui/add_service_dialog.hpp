@@ -11,17 +11,22 @@
 #include <domain/error/error.hpp>
 
 #include "controllers/main_controller.hpp"
+#include "controllers/sound_controller.hpp"
 
 
 class AddServiceDialog : public QDialog {
     Q_OBJECT
 public:
-    explicit AddServiceDialog(MainController& controller, QWidget* parent = nullptr);
+    explicit AddServiceDialog(MainController& controller, SoundController& sound_controller, QWidget* parent = nullptr);
 signals:
-    void addService(Service& service, std::uint32_t id);
+    void addService(std::uint32_t id);
 private:
     GenerationLevel generation_level_{GenerationLevel::Medium};
     MainController& controller_;
+    SoundController& sound_controller_;
+
+    // consteval std::format checker
+    static std::string current_time();
 };
 
 

@@ -35,7 +35,7 @@ namespace
     }
 }
 
-MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
+MainWidget::MainWidget(MainController &controller, SoundController& sound_controller, QWidget* parent) : QWidget(parent), controller_(controller), sound_controller_(sound_controller)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout(this);
 
@@ -57,7 +57,11 @@ MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(pa
 
     scroll_area->setWidget(container);
     connect(add_button, &QPushButton::clicked, [&,this] {
-        AddServiceDialog* service_dialog = new AddServiceDialog{controller_,this};
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+        AddServiceDialog* service_dialog = new AddServiceDialog{controller_,sound_controller_,this};
         connect(service_dialog, &AddServiceDialog::addService, this, &MainWidget::addService);
         service_dialog->exec();
     });
@@ -70,17 +74,17 @@ MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(pa
 void MainWidget::load_all()
 {
     for (const auto& [id,service] : controller_.getServices()) {
-        QWidget* serviceWidget = serviceToWidget(service,id);
+        QWidget* serviceWidget = serviceToWidget(id);
         container_layout_->addWidget(serviceWidget);
     }
 }
 
-QWidget* MainWidget::serviceToWidget(const Service& service, const std::uint32_t id)
+QWidget* MainWidget::serviceToWidget(const std::uint32_t id)
 {
     QIcon edit_icon = QIcon(":/assets/icons/edit.png");
     QIcon copy_login_icon = QIcon(":/assets/icons/copy_login.png");
     QIcon copy_password_icon = QIcon(":/assets/icons/copy_password.png");
-    QServiceCardWidget* serviceWidget = new QServiceCardWidget(service,id,copy_login_icon,copy_password_icon,edit_icon,this);
+    QServiceCardWidget* serviceWidget = new QServiceCardWidget(controller_,id,copy_login_icon,copy_password_icon,edit_icon,sound_controller_,this);
 
     connect(serviceWidget, &QServiceCardWidget::loginCopyButtonClicked, [this](const std::uint32_t& id) {
         QClipboard* clipboard = QApplication::clipboard();
@@ -91,19 +95,10 @@ QWidget* MainWidget::serviceToWidget(const Service& service, const std::uint32_t
         QClipboard* clipboard = QApplication::clipboard();
         clipboard->setText(controller_.getServices().at(id).password.c_str());
     });
-
-    connect(serviceWidget, &QServiceCardWidget::moreInfoButtonClicked, [this](const std::uint32_t& id) {
-        // todo add more info call
-    });
-
-    connect(serviceWidget, &QServiceCardWidget::serviceClicked, [this](const std::uint32_t& id)
-    {
-        // todo add more info call
-    });
     return serviceWidget;
 }
 
-void MainWidget::addService(const Service &service, const std::uint32_t id) {
-    QWidget* serviceWidget = serviceToWidget(service, id);
+void MainWidget::addService(const std::uint32_t id) {
+    QWidget* serviceWidget = serviceToWidget(id);
     container_layout_->addWidget(serviceWidget);
 }

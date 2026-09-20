@@ -37,11 +37,12 @@ namespace
     }
 }
 
-AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) : controller_(controller), QDialog(parent){
+AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& sound_controller, QWidget *parent) : controller_(controller), sound_controller_(sound_controller), QDialog(parent){
 
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QGroupBox* group_box = new QGroupBox("Add service", this);
+    group_box->setAlignment(Qt::AlignCenter);
 
     QVBoxLayout* group_layout = new QVBoxLayout(group_box);
 
@@ -64,7 +65,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
     custom_list_widget->setIcon(web_icon);
     // custom_list_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     custom_list_widget->setMaximumSize(50,50);
-    std::cout << custom_list_widget->size().width() << " " << custom_list_widget->size().height();
 
     name_layout->addWidget(name_label);
     name_layout->addWidget(name_input);
@@ -147,8 +147,12 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
     // ----------------------------- CONNECTS -----------------------------
 
     // GENERATION CHECKBOX
-    connect(generating_checkbox, &QCheckBox::toggled, [=](const bool checked)
+    connect(generating_checkbox, &QCheckBox::toggled, [=,this](const bool checked)
     {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         password_input->setVisible(!checked);
         generate_box->setVisible(checked);
     });
@@ -157,6 +161,10 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
     // COMBO BOX
     connect(generation_combo_box, &QComboBox::currentIndexChanged, [=,this](const int index)
     {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         switch (index)
         {
             case 0:
@@ -181,7 +189,11 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
 
     // todo парсить по строке при нажатии . вылезает список (кнопка скрытая смещается)
 
-    connect(custom_list_widget, &QCustomListWidget::optionSelected, [=](const QString& text) {
+    connect(custom_list_widget, &QCustomListWidget::optionSelected, [=,this](const QString& text) {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         QString current_name = name_input->text();
         if (name_input->text().endsWith("."))
         {
@@ -190,7 +202,11 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
         name_input->setText(current_name + text);
     });
 
-    connect(custom_list_widget_login, &QCustomListWidget::optionSelected,[=](const QString& text) {
+    connect(custom_list_widget_login, &QCustomListWidget::optionSelected,[=,this](const QString& text) {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         QString current_login = login_input->text();
         if (current_login.endsWith("@"))
         {
@@ -199,13 +215,21 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
         login_input->setText(current_login + text);
     });
 
-    connect(login_input, &QLineEdit::textChanged, [=](const QString &text) {
+    connect(login_input, &QLineEdit::textChanged, [=,this](const QString &text) {
+        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         if (text.endsWith("@")) {
             custom_list_widget_login->showList();
         }
     });
 
-    connect(name_input, &QLineEdit::textChanged, [=](const QString &text) {
+    connect(name_input, &QLineEdit::textChanged, [=,this](const QString &text) {
+        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         if (text.endsWith(".")) {
             custom_list_widget->showList();
         }
@@ -214,6 +238,10 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
     // ADD BUTTON
     connect(add_button, &QPushButton::clicked, [=,this]()->void
     {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         if (!name_input->text().isEmpty()
             && !login_input->text().isEmpty()
             && (!password_input->text().isEmpty() || generating_checkbox->isChecked()))
@@ -222,8 +250,10 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
             if (generating_checkbox->isChecked())
             {
                 service = Service{
-                    .name = name_input->text().toStdString(), .login = login_input->text().toStdString(),
-                    .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value(), generation_level_)
+                    .name = name_input->text().toStdString(),
+                    .login = login_input->text().toStdString(),
+                    .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value(), generation_level_),
+                    .created_at = current_time()
                 };
                 if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
                 {
@@ -231,18 +261,20 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
                     return;
                 } else
                 {
-                    addService(service, res_add.value());
+                    addService(res_add.value());
                 }
             } else
             {
-                service = Service{name_input->text().toStdString(),login_input->text().toStdString(),password_input->text().toStdString()};
+                service = Service{.name = name_input->text().toStdString(), .login = login_input->text().toStdString(),.password = password_input->text().toStdString(),
+                .created_at = current_time()};
                 if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
                 {
                     QMessageBox::warning(this, "Save Error",QString(res_add.error().message.c_str()));
                     return;
                 } else
                 {
-                    addService(service, res_add.value());
+                    std::cout << "emit" << std::endl;
+                    addService(res_add.value());
                 }
             }
             name_input->clear();
@@ -253,6 +285,22 @@ AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) 
     });
     connect(cancel_button, &QPushButton::clicked, [=,this]()->void
     {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         this->close();
     });
+    connect(password_input, &QLineEdit::textChanged, [=,this](const QString &)
+    {
+        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+    });
+}
+
+std::string AddServiceDialog::current_time()
+{
+    return std::format("{:%Y-%m-%d %H:%M:%S}", std::chrono::zoned_time{std::chrono::current_zone(),std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now())});
 }

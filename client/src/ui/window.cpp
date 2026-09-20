@@ -14,7 +14,7 @@
 #include "constants/paths.hpp"
 #include <ui/settings_dialog.hpp>
 
-MainWindow::MainWindow(MainController &controller)
+MainWindow::MainWindow(MainController &controller, SoundController& sound_controller) : controller_(controller), sound_controller_(sound_controller)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout(this);
 
@@ -51,8 +51,8 @@ MainWindow::MainWindow(MainController &controller)
 
     QStackedWidget* stack = new QStackedWidget(this);
 
-    EntryWidget* entry_widget = new EntryWidget(controller,stack);
-    MainWidget* main_widget = new MainWidget(controller,stack); // todo to signals work
+    EntryWidget* entry_widget = new EntryWidget(controller_,sound_controller_,stack);
+    MainWidget* main_widget = new MainWidget(controller_,sound_controller_,stack); // todo to signals work
 
     stack->addWidget(entry_widget);
     stack->addWidget(main_widget);
@@ -71,12 +71,12 @@ MainWindow::MainWindow(MainController &controller)
 
     connect(settings_button, &QPushButton::clicked, [&]()->void
     {
-        SettingsDialog* dialog = new SettingsDialog(controller,this);
-        if (auto res = SoundController::playSound(SoundType::Click); res.has_value()) {
-            dialog->exec();
-        } else {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
+        SettingsDialog* dialog = new SettingsDialog(controller_,sound_controller_,this);
+        dialog->exec();
     });
 
     rootLayout->addLayout(top_layout);

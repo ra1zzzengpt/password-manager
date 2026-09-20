@@ -36,7 +36,9 @@ int main(int argc, char* argv[])
         logs->info_log("Application startup");
 
         MainController mainController{*logs};
-        MainWindow* mainWindow = new MainWindow(mainController);
+        SoundController sound_controller;
+
+        MainWindow* mainWindow = new MainWindow(mainController,sound_controller);
         mainWindow->show();
         const int exit_code = QApplication::exec();
 
