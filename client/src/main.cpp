@@ -25,7 +25,7 @@ namespace
 int main(int argc, char* argv[])
 {
     QApplication app{argc, argv};
-    if (QFile theme(":/assets/theme.qss"); theme.open(QFile::ReadOnly))
+    if (QFile theme(":/assets/dark_theme.qss"); theme.open(QFile::ReadOnly))
         app.setStyleSheet(QString(theme.readAll()));
 
     std::unique_ptr<Logs> logs;

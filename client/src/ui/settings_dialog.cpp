@@ -3,12 +3,14 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QGroupBox>
+#include <QCheckBox>
 #include <QMessageBox>
 #include <qslider.h>
 #include <ui/settings_dialog.hpp>
 
 SettingsDialog::SettingsDialog(MainController &controller, SoundController& sound_controller, QWidget *parent) : QDialog(parent), controller_(controller), sound_controller_(sound_controller)
 {
+    this->setFixedSize(600,350);
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QGroupBox* password_group = new QGroupBox("Change master-password",this);
@@ -50,18 +52,41 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
 
     QVBoxLayout* sfx_layout = new QVBoxLayout(sfx_groupbox);
 
+    QHBoxLayout* volume_layout = new QHBoxLayout();
+
     QLabel* mini_volume = new QLabel(this);
     mini_volume->setObjectName("miniLabel");
     mini_volume->setText(("Volume: " + std::to_string(sound_controller_.getVolume())).c_str());
+
+    QCheckBox* sound_enabled = new QCheckBox(this);
+    sound_enabled->setText("Sound Enabled");
+    sound_enabled->setChecked(true);
+
+    volume_layout->addWidget(mini_volume);
+    volume_layout->addWidget(sound_enabled);
 
     QSlider* volume_slider = new QSlider(this);
     volume_slider->setOrientation(Qt::Horizontal);
     volume_slider->setMinimum(0);
     volume_slider->setMaximum(100);
-    volume_slider->setValue(sound_controller_.getVolume());
+    volume_slider->setValue(static_cast<std::int32_t>(sound_controller_.getVolume()));
 
-    sfx_layout->addWidget(mini_volume);
+    sfx_layout->addLayout(volume_layout);
     sfx_layout->addWidget(volume_slider);
+
+    connect(sound_enabled, &QCheckBox::toggled, [=,this](const bool state)
+    {
+        sound_controller_.setSoundEnabled(state);
+        if (!state)
+        {
+            mini_volume->setEnabled(false);
+            volume_slider->setEnabled(false);
+        } else
+        {
+            mini_volume->setEnabled(true);
+            volume_slider->setEnabled(true);
+        }
+    });
 
     connect(old_password, &QLineEdit::textChanged,[this]
     {

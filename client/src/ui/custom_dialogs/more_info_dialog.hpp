@@ -15,6 +15,7 @@ public:
 
 signals:
     void updateService(const Service& service);
+    void deleteService();
 
 private:
     std::uint32_t id_;

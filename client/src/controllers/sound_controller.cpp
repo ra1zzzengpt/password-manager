@@ -4,7 +4,7 @@
 
 #include "sound_controller.hpp"
 
-SoundController::SoundController() : volume_(0.2)
+SoundController::SoundController() : volume_(0.2), soundsEnabled_(true)
 {
     type_ = new QSoundEffect();
     type_->setSource(QUrl::fromLocalFile((":/assets/sounds/type.wav")));
@@ -21,7 +21,7 @@ SoundController::SoundController() : volume_(0.2)
 
 std::expected<void, err::Error> SoundController::playSound(const SoundType& sound) const
 {
-    if (volume_ == 0)
+    if (volume_ == 0 || !soundsEnabled_)
     {
         return {};
     }
@@ -52,7 +52,12 @@ std::uint32_t SoundController::getVolume() const
     return static_cast<std::uint32_t>(volume_ * 100);
 }
 
-void SoundController::setVolume(std::uint32_t volume)
+void SoundController::setVolume(const std::uint32_t volume)
 {
     volume_ = static_cast<std::float_t>(volume) / 100;
+}
+
+void SoundController::setSoundEnabled(const bool enabled)
+{
+    soundsEnabled_ = enabled;
 }

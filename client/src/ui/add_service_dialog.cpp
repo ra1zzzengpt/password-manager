@@ -21,24 +21,9 @@
 
 #include "custom_list_widget.hpp"
 
-namespace
-{
-    QString cutString(const QString& str)
-    {
-        QString result;
-        if (str.length() > 30)
-        {
-            result = str.left(30) + "...";
-        } else
-        {
-            result = str;
-        }
-        return result;
-    }
-}
-
 AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& sound_controller, QWidget *parent) : controller_(controller), sound_controller_(sound_controller), QDialog(parent){
 
+    this->setFixedSize(900,300);
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QGroupBox* group_box = new QGroupBox("Add service", this);
@@ -273,7 +258,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
                     return;
                 } else
                 {
-                    std::cout << "emit" << std::endl;
                     addService(res_add.value());
                 }
             }

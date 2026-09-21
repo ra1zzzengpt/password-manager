@@ -7,6 +7,22 @@
 
 #include "ui/custom_dialogs/more_info_dialog.hpp"
 
+namespace
+{
+    QString cutString(const QString& str)
+    {
+        QString result;
+        if (str.length() > 20)
+        {
+            result = str.left(20) + "...";
+        } else
+        {
+            result = str;
+        }
+        return result;
+    }
+}
+
 QServiceCardWidget::QServiceCardWidget(
     MainController& controller,
     const std::uint32_t& id,
@@ -27,13 +43,13 @@ QFrame(parent)
     serviceNameLabel_ = new QLabel(this);
     serviceNameLabel_->setObjectName("serviceName");
     serviceNameLabel_->setAttribute(Qt::WA_TransparentForMouseEvents);
-    serviceNameLabel_->setText(controller_.getServices().at(id_).name.c_str());
+    serviceNameLabel_->setText(cutString(controller_.getServices().at(id_).name.c_str()));
 
     loginLabel_ = new QLabel(this);
     loginLabel_->setObjectName("serviceLogin");
     loginLabel_->setAttribute(Qt::WA_TransparentForMouseEvents);
     loginLabel_->setContentsMargins(0,0,0,0);
-    loginLabel_->setText(controller_.getServices().at(id_).login.c_str());
+    loginLabel_->setText(cutString(controller_.getServices().at(id_).login.c_str()));
 
     text_layout->addWidget(serviceNameLabel_);
     text_layout->addWidget(loginLabel_);
@@ -75,13 +91,16 @@ QFrame(parent)
         }
         QMoreInfoDialog* more_info_dialog = new QMoreInfoDialog(controller_,id_,sound_controller_,this);
         connect(more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
+        connect(more_info_dialog, &QMoreInfoDialog::deleteService, [this]
+        {
+            this->close();
+        });
         more_info_dialog->exec();
     });
 
     rootLayout->addWidget(loginCopyButton_);
     rootLayout->addWidget(passwordCopyButton_);
     rootLayout->addWidget(moreInfoButton_);
-    rootLayout->addStretch();
 
     createdAtLabel_ = new QLabel(this);
     createdAtLabel_->setText(controller_.getServices().at(id_).created_at.c_str());
@@ -98,6 +117,10 @@ void QServiceCardWidget::mousePressEvent(QMouseEvent* event)
         }
         QMoreInfoDialog* more_info_dialog = new QMoreInfoDialog(controller_,id_,sound_controller_,this);
         connect(more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
+        connect(more_info_dialog, &QMoreInfoDialog::deleteService, [this]
+        {
+            this->close();
+        });
         more_info_dialog->exec();
         event->accept();
         return;

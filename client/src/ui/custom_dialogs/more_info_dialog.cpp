@@ -11,9 +11,12 @@
 #include <QLabel>
 #include <QLineEdit>
 
+#include "generate/generator.hpp"
+
 QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t& id, SoundController &sound_controller, QWidget *parent)
     : QDialog(parent), sound_controller_(sound_controller), controller_(controller), id_(id)
 {
+    this->setFixedSize(900,350);
     QVBoxLayout* root = new QVBoxLayout(this);
 
     QHBoxLayout* top_layout = new QHBoxLayout;
@@ -22,7 +25,9 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
     QPushButton* back_button = new QPushButton(this);
     back_button->setIcon(backIcon);
 
-    QLabel* label = new QLabel("Edit",this);
+    QLabel* label = new QLabel(QString(controller_.getServices().at(id_).name.c_str()).toUpper(),this);
+
+    QFontMetrics fontMetrics(label->font());
 
     top_layout->addWidget(back_button);
     top_layout->addStretch();
@@ -31,10 +36,16 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
 
     QHBoxLayout* edit_layout = new QHBoxLayout();
 
+    QIcon deleteIcon(":/assets/icons/delete.png");
+    QPushButton* delete_button = new QPushButton(this);
+    delete_button->setIcon(deleteIcon);
+    delete_button->setObjectName("dangerButton");
+
     QIcon editIcon(":/assets/icons/edit.png");
-    QCheckBox* edit_on = new QCheckBox(this);
+    QCheckBox* edit_on = new QCheckBox("Edit",this);
     edit_on->setIcon(editIcon);
 
+    edit_layout->addWidget(delete_button);
     edit_layout->addStretch();
     edit_layout->addWidget(edit_on);
 
@@ -46,7 +57,7 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
     QLineEdit* name_line_edit = new QLineEdit(this);
     name_line_edit->setPlaceholderText("Service name...");
     name_line_edit->setText(controller_.getServices().at(id_).name.c_str());
-    name_line_edit->setMinimumWidth(320);
+    name_line_edit->setMinimumWidth(fontMetrics.maxWidth() * 15);
 
     name_layout->addWidget(name_label);
     name_layout->addWidget(name_line_edit);
@@ -59,6 +70,7 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
     QLineEdit* login_line_edit = new QLineEdit(this);
     login_line_edit->setPlaceholderText("Service login...");
     login_line_edit->setText(controller_.getServices().at(id_).login.c_str());
+    login_line_edit->setMinimumWidth(fontMetrics.maxWidth() * 15);
 
     QIcon copyLoginIcon(":/assets/icons/copy_login.png");
     QPushButton* copy_login_button = new QPushButton(this);
@@ -77,17 +89,35 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
     password_line_edit->setPlaceholderText("Service password...");
     password_line_edit->setText(controller_.getServices().at(id_).password.c_str());
     password_line_edit->setEchoMode(QLineEdit::Password);
+    password_line_edit->setMinimumWidth(fontMetrics.maxWidth() * 15);
 
-    QIcon seeIcon(":/assets/icons/eye.png");
-    QCheckBox* see_password = new QCheckBox(this);
-    see_password->setIcon(seeIcon);
+    QPushButton* level_button = new QPushButton(this);
+
+    EntropyLevel level = Generator::Entropy(password_line_edit->text().toStdString());
+    QIcon level_icon;
+    if (level == EntropyLevel::High)
+    {
+        level_icon = QIcon(":assets/icons/happy.png");
+    } else if (level == EntropyLevel::Medium)
+    {
+        level_icon = QIcon(":/assets/icons/neutral.png");
+    } else
+    {
+        level_icon = QIcon(":/assets/icons/sad.png");
+    }
+    level_button->setIcon(level_icon);
 
     QIcon copyPasswordIcon(":/assets/icons/copy_password.png");
     QPushButton* copy_password_button = new QPushButton(this);
     copy_password_button->setIcon(copyPasswordIcon);
 
+    QIcon seeIcon(":/assets/icons/eye.png");
+    QCheckBox* see_password = new QCheckBox(this);
+    see_password->setIcon(seeIcon);
+
     password_layout->addWidget(password_label);
     password_layout->addWidget(password_line_edit);
+    password_layout->addWidget(level_button);
     password_layout->addWidget(copy_password_button);
     password_layout->addWidget(see_password);
 
@@ -173,12 +203,25 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
         }
     });
 
-    connect(password_line_edit, &QLineEdit::textChanged, [this]
+    connect(password_line_edit, &QLineEdit::textChanged, [=,this]
     {
         if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
+        EntropyLevel lvl = Generator::Entropy(password_line_edit->text().toStdString());
+        QIcon icon;
+        if (lvl == EntropyLevel::High)
+        {
+            icon = QIcon(":assets/icons/happy.png");
+        } else if (lvl == EntropyLevel::Medium)
+        {
+            icon = QIcon(":/assets/icons/neutral.png");
+        } else
+        {
+            icon = QIcon(":/assets/icons/sad.png");
+        }
+        level_button->setIcon(icon);
     });
 
     connect(see_password, &QCheckBox::toggled, [=,this](const bool state)
@@ -212,6 +255,44 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
         {
             emit updateService(service);
         }
+        this->close();
+    });
+
+    connect(level_button, &QPushButton::clicked, [this]
+    {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+        QMessageBox::information(this, "Entropy information",
+                                 "Entropy estimates how difficult a password is to guess.\n\n"
+                                 "E = L × log₂(N), where L is the password length and N is the size "
+                                 "of the detected character pool.\n\n"
+                                 "Character sets: lowercase — 26, uppercase — 26, digits — 10, "
+                                 "special characters — 29 (91 in total).\n\n"
+                                 "Current strength levels:\n"
+                                 "Low: less than 50 bits\n"
+                                 "Medium: from 50 to 79 bits\n"
+                                 "High: 80 bits or more");
+    });
+
+    connect(delete_button, &QPushButton::clicked, [=,this]
+    {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+
+        if (auto result = QMessageBox::question(this, "Delete", "Are you sure you want to remove this service?"); result == QMessageBox::Yes)
+        {
+            if (auto res = controller_.removeService(id_); !res.has_value())
+            {
+                QMessageBox::warning(this, "Warning", res.error().message.c_str());
+            } else
+            {
+                emit deleteService();
+            }
+            this->close();
+        }
     });
 }
-

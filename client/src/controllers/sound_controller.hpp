@@ -22,10 +22,15 @@ class SoundController {
 public:
     SoundController();
     [[nodiscard]] std::expected<void, err::Error> playSound(const SoundType& sound) const;
-    std::uint32_t getVolume() const;
+
+    [[nodiscard]] std::uint32_t getVolume() const;
     void setVolume(std::uint32_t volume);
+
+    void setSoundEnabled(bool enabled);
 private:
     std::float_t volume_;
+    bool soundsEnabled_;
+
     QSoundEffect* type_;
     QSoundEffect* notification_;
     QSoundEffect* click_;
