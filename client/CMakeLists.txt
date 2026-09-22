@@ -1,4 +1,7 @@
 add_library(pwd-core STATIC
+        src/controllers/configuration_controller.cpp
+        src/controllers/configuration_controller.hpp
+        src/domain/config.hpp
         src/controllers/main_controller.cpp
         src/crypto/sodium.cpp
         src/crypto/sodium.hpp
@@ -52,14 +55,15 @@ target_link_libraries(pwd-core PRIVATE
         sodium
         nlohmann_json::nlohmann_json
 )
-add_executable(password-manager src/main.cpp)
+add_executable(password-manager src/main.cpp
+        src/utils/csv_parser.cpp
+        src/utils/csv_parser.hpp)
 
 qt_add_resources(password-manager theme
         PREFIX "/"
         FILES
         assets/dark_theme.qss
         assets/white_theme.qss
-        assets/blue_theme.qss
         assets/nord_theme.qss
 
         assets/icons/settings.png
@@ -77,6 +81,13 @@ qt_add_resources(password-manager theme
         assets/icons/happy.png
         assets/icons/neutral.png
         assets/icons/sad.png
+        assets/icons/save.png
+        assets/icons/import.png
+        assets/icons/export.png
+
+        assets/icons/white_theme.png
+        assets/icons/dark_theme.png
+        assets/icons/nord_theme.png
 
         assets/sounds/click.wav
         assets/sounds/notification.wav
