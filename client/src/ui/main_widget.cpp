@@ -14,26 +14,12 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <generate/generator.hpp>
+#include <QFileDialog>
+#include <QLayoutItem>
 #include <utils/transform.hpp>
 
 #include "add_service_dialog.hpp"
 #include "custom_widgets/service_card_widget.hpp"
-
-namespace
-{
-    QString cutString(const QString& str)
-    {
-        QString result;
-        if (str.length() > 30)
-        {
-            result = str.left(30) + "...";
-        } else
-        {
-            result = str;
-        }
-        return result;
-    }
-}
 
 MainWidget::MainWidget(MainController &controller, SoundController& sound_controller, QWidget* parent) : QWidget(parent), controller_(controller), sound_controller_(sound_controller)
 {
@@ -41,9 +27,25 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
 
     // ------------------------- SET ------------------------------------
 
+    QHBoxLayout* serv_layout = new QHBoxLayout();
+
     QIcon add_icon = QIcon(":/assets/icons/add.png");
     QPushButton* add_button = new QPushButton("Add", this);
     add_button->setIcon(add_icon);
+
+    QIcon import_icon = QIcon(":/assets/icons/import.png");
+    QPushButton* import_button = new QPushButton(this);
+    import_button->setIcon(import_icon);
+    import_button->setMaximumWidth(import_button->height() + 20);
+
+    QIcon export_icon = QIcon(":/assets/icons/export.png");
+    QPushButton* export_button = new QPushButton(this);
+    export_button->setIcon(export_icon);
+    export_button->setMaximumWidth(export_button->height() + 20);
+
+    serv_layout->addWidget(add_button);
+    serv_layout->addWidget(import_button);
+    serv_layout->addWidget(export_button);
 
     // ------------------------- SCROLL AREA -----------------------------
     QScrollArea* scroll_area = new QScrollArea(this);
@@ -66,13 +68,48 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         service_dialog->exec();
     });
 
-    rootLayout->addWidget(add_button);
+    rootLayout->addLayout(serv_layout);
     rootLayout->addWidget(scroll_area);
+
+    connect(import_button, &QPushButton::clicked, [this] {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+        QString filepath = QFileDialog::getOpenFileName(this, "Choose csv", "/home","*.csv");
+        if (filepath.isEmpty()) {
+            return;
+        }
+        if (auto res = controller_.importCSV(filepath.toStdString()); !res.has_value()) {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+            return;
+        }
+        refresh();
+        QMessageBox::information(this, "Information", "Success");
+    });
+
+    connect(export_button, &QPushButton::clicked, [this] {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
+        {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+        if (auto res = controller_.exportCSV(); !res.has_value()) {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+            return;
+        }
+        QMessageBox::information(this, "Information", "Success.\n Saved to assets/export/export.csv");
+    });
 }
 
 // todo refresh now very big data taking function full rework this
-void MainWidget::load_all()
+void MainWidget::refresh()
 {
+    QLayoutItem* item;
+    while ((item = container_layout_->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+
     for (const auto& [id,service] : controller_.getServices()) {
         QWidget* serviceWidget = serviceToWidget(id);
         container_layout_->addWidget(serviceWidget);

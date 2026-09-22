@@ -16,7 +16,7 @@ public:
     explicit MainWidget(MainController& controller, SoundController& sound_controller, QWidget* parent = nullptr);
 
 public slots:
-    void load_all();
+    void refresh();
     void addService(std::uint32_t id);
 private:
     MainController& controller_;
