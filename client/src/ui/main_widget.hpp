@@ -6,22 +6,24 @@
 
 #include <controllers/main_controller.hpp>
 
-class MainScreen final : public QWidget
+#include "controllers/sound_controller.hpp"
+
+class MainWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainScreen(MainController& controller, QWidget* parent = nullptr);
+    explicit MainWidget(MainController& controller, SoundController& sound_controller, QWidget* parent = nullptr);
 
-signals:
-    void settings();
 public slots:
     void refresh();
+    void addService(std::uint32_t id);
 private:
     MainController& controller_;
+    SoundController& sound_controller_;
     QVBoxLayout* container_layout_ = nullptr;
     QLabel* error_ = nullptr;
     GenerationLevel generation_level_{GenerationLevel::Medium};
     // todo error type
-    [[nodiscard]] QWidget* serviceToWidget(const QString& name, const QString& login, const QString& password, std::size_t index);
+    [[nodiscard]] QWidget* serviceToWidget(std::uint32_t id);
 };

@@ -4,9 +4,12 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
-#include <ui/pw_screen.hpp>
+#include <QMediaPlayer>
+#include <QAudioOutput>
+#include <QUrl>
+#include <ui/entry_widget.hpp>
 
-PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
+EntryWidget::EntryWidget(MainController &controller, SoundController& sound_controller, QWidget* parent) : QWidget(parent), controller_(controller), sound_controller_(sound_controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
@@ -35,6 +38,13 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
     error->setAlignment(Qt::AlignCenter);
     error->setObjectName("error");
 
+    connect(password_input, &QLineEdit::textChanged, this, [this]() {
+        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value()) {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
+    });
+
+
     connect(password_input,&QLineEdit::returnPressed,[=,this]()
     {
         error->setText(QString());
@@ -58,6 +68,9 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
 
     connect(delete_button,&QPushButton::clicked,[this,error]()
     {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value()) {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         QMessageBox* message_box = new QMessageBox();
         message_box->setWindowTitle("Deletion confirmation");
         message_box->setText("Are you sure you want to delete all password information?");
@@ -66,6 +79,9 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
         message_box->setIcon(QMessageBox::Warning);
         message_box->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         message_box->setDefaultButton(QMessageBox::No);
+        if (auto res = sound_controller_.playSound(SoundType::Notification); !res.has_value()) {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         if (const int ans = message_box->exec(); ans == QMessageBox::Yes)
         {
             if (const std::expected<void, err::Error> delete_res = controller_.deleteStorage(); !delete_res.has_value())
@@ -79,6 +95,9 @@ PWScreen::PWScreen(MainController &controller, QWidget* parent) : QWidget(parent
 
     connect(next_button,&QPushButton::clicked,[=,this]()
     {
+        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value()) {
+            QMessageBox::warning(this, "Warning", res.error().message.c_str());
+        }
         error->setText(QString());
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
         {

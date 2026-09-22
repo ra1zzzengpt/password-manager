@@ -2,7 +2,7 @@
 
 MainController::MainController(Logs& logs) : storageController_(logs) {}
 
-const std::vector<Service>& MainController::getServices()
+const std::unordered_map<std::uint32_t, Service>& MainController::getServices()
 {
     return storageController_.services();
 }
@@ -27,7 +27,7 @@ std::expected<void, err::Error> MainController::deleteStorage()
     return storageController_.del();
 }
 
-std::expected<void, err::Error> MainController::addService(const Service &service)
+std::expected<std::uint32_t, err::Error> MainController::addService(const Service &service)
 {
     return storageController_.addService(service);
 }
@@ -37,7 +37,15 @@ std::expected<void, err::Error> MainController::removeService(const std::size_t&
     return storageController_.removeService(index);
 }
 
-std::expected<void, err::Error> MainController::rewriteService(const std::string& name, const std::string& login, const std::string& password, const std::size_t& index)
+std::expected<void, err::Error> MainController::rewriteService(const Service& service, const std::size_t& index)
 {
-    return storageController_.rewriteService(name, login, password, index);
+    return storageController_.rewriteService(service, index);
+}
+
+std::expected<void, err::Error> MainController::importCSV(const std::string& file_path) {
+    return storageController_.importCSV(file_path);
+}
+
+std::expected<void, err::Error> MainController::exportCSV() {
+    return storageController_.exportCSV();
 }
