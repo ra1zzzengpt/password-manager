@@ -142,3 +142,35 @@ QToolTip {
     border: 1px solid #606060;
     border-radius: 4px;
 }
+
+QRadioButton {
+    spacing: 7px;
+    background: transparent;
+    color: #eeeeee;
+}
+
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    background-color: #2a2a2a;
+    border: 1px solid #606060;
+    border-radius: 9px;
+}
+
+QRadioButton::indicator:hover {
+    border-color: #999999;
+}
+
+QRadioButton::indicator:checked {
+    background-color: #888888;
+    border: 3px solid #2a2a2a;
+}
+
+QRadioButton::indicator:checked:hover {
+    background-color: #aaaaaa;
+}
+
+QRadioButton::indicator:disabled {
+    background-color: #222222;
+    border-color: #383838;
+}
