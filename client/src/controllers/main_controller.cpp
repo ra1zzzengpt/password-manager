@@ -45,3 +45,11 @@ std::expected<void, err::Error> MainController::rewriteService(const Service& se
 std::uint32_t MainController::nextServiceIndex() {
     return storageController_.nextServiceIndex();
 }
+
+std::expected<void, err::Error> MainController::importCSV(const std::string& file_path) {
+    return storageController_.importCSV(file_path);
+}
+
+std::expected<void, err::Error> MainController::exportCSV() {
+    return storageController_.exportCSV();
+}

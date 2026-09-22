@@ -14,7 +14,10 @@
 #include "constants/paths.hpp"
 #include <ui/settings_dialog.hpp>
 
-MainWindow::MainWindow(MainController &controller, SoundController& sound_controller) : controller_(controller), sound_controller_(sound_controller)
+MainWindow::MainWindow(MainController &controller, SoundController& sound_controller,
+                       ConfigurationController& configuration_controller, QApplication& app)
+    : controller_(controller), sound_controller_(sound_controller),
+      configuration_controller_(configuration_controller), app_(app)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout(this);
 
@@ -57,7 +60,7 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
     stack->addWidget(entry_widget);
     stack->addWidget(main_widget);
 
-    connect(entry_widget, &EntryWidget::unlocked, main_widget, &MainWidget::load_all);
+    connect(entry_widget, &EntryWidget::unlocked, main_widget, &MainWidget::refresh);
 
     connect(entry_widget, &EntryWidget::unlocked, stack, [stack, main_widget]()
     {
@@ -75,7 +78,8 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        SettingsDialog* dialog = new SettingsDialog(controller_,sound_controller_,this);
+        SettingsDialog* dialog = new SettingsDialog(controller_, sound_controller_,
+                                                    configuration_controller_, app_, this);
         dialog->exec();
     });
 

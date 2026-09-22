@@ -243,3 +243,21 @@ std::uint32_t StorageController::nextServiceIndex() {
     }
     return services_.size() - 1;
 }
+
+std::expected<void, err::Error> StorageController::importCSV(const std::string& file_path) {
+    if (auto res = CSVParser::parseCSV(file_path); !res.has_value()) {
+        return std::unexpected{res.error()};
+    } else {
+        for (const auto& service : res.value()) {
+            services_.emplace(nextServiceIndex(), service);
+        }
+    }
+    return save();
+}
+
+std::expected<void, err::Error> StorageController::exportCSV() {
+    if (auto res = CSVParser::exportCSV((cnt::getAssetsBasePath()/"export"/"export.csv").c_str(),services_); !res.has_value()) {
+        return std::unexpected{res.error()};
+    }
+    return {};
+}

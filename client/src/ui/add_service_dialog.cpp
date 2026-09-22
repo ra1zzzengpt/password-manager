@@ -23,7 +23,7 @@
 
 AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& sound_controller, QWidget *parent) : controller_(controller), sound_controller_(sound_controller), QDialog(parent){
 
-    this->setFixedSize(900,300);
+    this->setFixedSize(900,280);
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QGroupBox* group_box = new QGroupBox("Add service", this);

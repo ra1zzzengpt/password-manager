@@ -7,6 +7,7 @@
 #include "crypto/sodium.hpp"
 #include "domain/service.hpp"
 #include "domain/error/error.hpp"
+#include "utils/csv_parser.hpp"
 
 class Logs;
 
@@ -46,6 +47,12 @@ public:
     const std::unordered_map<std::uint32_t, Service>& services();
 
     std::uint32_t nextServiceIndex();
+
+    // --------------- CSV --------------------------
+
+    std::expected<void, err::Error> importCSV(const std::string& file_path);
+
+    std::expected<void, err::Error> exportCSV();
 
     // --------------- SODIUM -----------------------
     std::expected<void,err::Error> setMasterPassword(const std::string& password);

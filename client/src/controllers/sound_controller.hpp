@@ -20,10 +20,11 @@ enum class SoundType
 
 class SoundController {
 public:
-    SoundController();
+    explicit SoundController(std::uint32_t volume);
     [[nodiscard]] std::expected<void, err::Error> playSound(const SoundType& sound) const;
 
     [[nodiscard]] std::uint32_t getVolume() const;
+    [[nodiscard]] bool isSoundEnabled() const;
     void setVolume(std::uint32_t volume);
 
     void setSoundEnabled(bool enabled);
