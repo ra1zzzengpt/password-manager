@@ -2,7 +2,7 @@
 
 # Password Manager
 
-**A private, local-first desktop vault for your credentials.**
+**Local-first password vault built with C++23, Qt 6, and libsodium.**
 
 [![C++ CI](https://github.com/ra1zzzengpt/password-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/ra1zzzengpt/password-manager/actions/workflows/ci.yml)
 [![C++23](https://img.shields.io/badge/C%2B%2B-23-00599C?logo=cplusplus)](https://en.cppreference.com/w/cpp/23)
@@ -10,60 +10,72 @@
 [![CMake](https://img.shields.io/badge/CMake-3.20%2B-064F8C?logo=cmake)](https://cmake.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-No account. No cloud service. One encrypted vault protected by your master password.
+No account, no cloud service, and no network access at runtime. Your credentials stay in one encrypted vault on your device.
 
 </div>
 
 > [!WARNING]
-> Password Manager is under active development and has not undergone an independent security audit. Do not use it as the only copy of critical credentials, and keep backups of important data.
+> This project is under active development and has not received an independent security audit. Keep a separate backup of important credentials and do not rely on Password Manager as their only copy.
 
 ![Password Manager main screen](img/image1.png)
 
-## What it does
+## Features
 
-- stores credentials in a local encrypted vault;
-- adds, edits, and removes entries;
-- masks passwords until you choose to reveal them;
-- copies passwords to the system clipboard;
-- generates passwords with Low, Medium, and High presets;
-- displays a simple color-coded password-strength estimate;
-- changes the master password and re-encrypts the vault;
-- reports critical startup failures through a native dialog;
-- writes privacy-conscious diagnostic logs without credential contents.
+- encrypted local credential storage;
+- add, edit, and remove credential entries;
+- copy logins and passwords to the system clipboard;
+- password generation with Low, Medium, and High presets;
+- password-strength estimation;
+- master-password changes with vault re-encryption;
+- CSV import and export;
+- Dark, White, and Nord themes;
+- configurable interface sound effects and volume;
+- privacy-conscious per-session diagnostic logging;
+- an isolated experimental Android port.
 
-Password Manager does not require registration and does not upload your vault to a remote server.
+## Security model
 
-## Requirements and platform support
+The desktop client serializes the vault to JSON in memory and protects it with libsodium:
+
+- the encryption key is derived from the master password using Argon2id (`crypto_pwhash`);
+- vault contents are encrypted and authenticated with `crypto_secretbox`;
+- each new vault receives a random salt, and every save receives a random nonce;
+- the persisted binary layout is `nonce || salt || ciphertext-with-MAC`;
+- the key, salt, and in-memory master-password buffer are cleared when the crypto component is destroyed.
+
+The master password must contain at least 8 characters. It is never stored, and there is no password-recovery mechanism.
+
+> [!CAUTION]
+> The **Delete** button on the unlock screen permanently removes the encrypted vault. Use it only when you no longer need the stored credentials or have a verified backup.
+
+## Requirements
 
 | Component | Requirement |
 |---|---|
 | Language | C++23 |
 | Build system | CMake 3.20 or newer |
-| UI framework | Qt 6 Core and Widgets |
-| Build tool | Ninja recommended; Make is also supported by CMake |
-| Compiler | A compiler and standard library with the required C++23 features, including `std::expected`, `std::format`, and chrono time-zone support |
-| Network | Required during the first configuration to download pinned dependencies |
+| UI | Qt 6 Core, Widgets, Multimedia, and MultimediaWidgets |
+| Cryptography | libsodium, downloaded automatically by CMake |
+| Serialization | nlohmann/json, downloaded automatically by CMake |
+| Compiler | C++23 support for `std::expected`, `std::format`, ranges, and chrono time zones |
+| Network | Needed during the first CMake configuration to fetch pinned dependencies |
 
-| Operating system | Status | Notes |
-|---|:---:|---|
-| Linux | ✅ Tested | Built automatically on Ubuntu by GitHub Actions |
-| Windows | 🧪 Experimental | The code is intended to be portable, but no installer or maintained build guide is available yet |
-| macOS | 🧪 Experimental | The code is intended to be portable, but no app bundle or maintained build guide is available yet |
+GitHub Actions currently builds the desktop client on Linux, Windows, and macOS. Prebuilt releases and installers are not provided yet.
 
-## Install on Linux
+## Build the desktop client
 
-Prebuilt packages are not available yet, so the application must currently be built from source.
-
-### 1. Install build dependencies
+### Linux dependencies
 
 Ubuntu or Debian:
 
 ```bash
 sudo apt update
-sudo apt install build-essential cmake git ninja-build qt6-base-dev
+sudo apt install build-essential cmake git ninja-build qt6-base-dev qt6-multimedia-dev
 ```
 
-### 2. Clone and build
+Package names vary between distributions. A recent GCC or Clang toolchain may be required for the C++23 library features used by the project.
+
+### Configure and compile
 
 ```bash
 git clone https://github.com/ra1zzzengpt/password-manager.git
@@ -77,96 +89,142 @@ cmake -S . -B build \
 cmake --build build --target password-manager --parallel
 ```
 
-The first CMake configuration downloads pinned versions of libsodium and nlohmann/json.
+`SODIUM_DISABLE_TESTS=ON` skips the upstream libsodium test targets and does not disable any Password Manager functionality.
 
-### 3. Run
+### Run
 
-Run the application from the repository root:
+From the repository root:
 
 ```bash
 ./build/client/password-manager
 ```
 
-The current version searches the working directory and its parent directories for `client/assets` or `assets`, so launching it from the repository root is recommended.
+The application searches the current directory and up to three parent directories for `client/assets` or `assets`. Running it from the repository root or its CMake build directory keeps resource discovery predictable.
 
 ## First launch
-
+q
 <div align="center">
   <img src="img/image.png" alt="Master-password screen" width="420">
 </div>
 
-1. Enter a new master password containing at least 8 characters.
+1. Enter a master password containing at least 8 characters.
 2. Select **Next**.
-3. The application creates a new encrypted vault.
+3. If no vault exists, the application creates a new encrypted vault.
 
-Use the same master password on later launches. An incorrect password cannot decrypt the existing vault.
-
-> [!CAUTION]
-> A forgotten master password cannot be recovered. The **Delete** button on the unlock screen permanently removes the entire encrypted vault.
+On later launches, enter the same password to decrypt the existing vault. An incorrect password cannot open it.
 
 ## Using the vault
 
 ### Add a credential
 
-1. Enter a service name, login, and password.
-2. Select **Add Service**.
-3. The updated vault is encrypted and saved immediately.
+Select **Add**, enter the service name, login, and password, then select **Add Service**. The encrypted vault is saved immediately.
 
-To create a password automatically, enable **Generate**, choose a generation preset, and select the desired length.
+Enable **Generate** to create a password instead. The available presets are Low, Medium, and High, and generated passwords can be between 8 and 500 characters; the High preset requires at least 16 characters.
 
-### Manage an existing credential
+### Manage credentials
 
-Each entry provides controls to:
+Each credential card shows the service, login, and creation time. From the card you can:
 
-- view its password-strength indicator;
-- reveal or hide the password;
-- edit the service, login, or password;
-- remove the entry;
-- copy the password with **Copy**.
+- copy the login;
+- copy the password;
+- open details;
+- edit or delete the credential;
+- inspect the password-strength indicator.
 
 > [!NOTE]
-> A copied password remains in the system clipboard. Other applications may be able to read it, and Password Manager does not clear the clipboard automatically yet.
+> Copied values remain in the system clipboard until another application replaces them. Password Manager does not currently clear the clipboard automatically.
 
-### Change the master password
+### Settings
 
-<div align="center">
-  <img src="img/image2.png" alt="Change master password screen" width="720">
-</div>
+Open the settings dialog to:
 
-1. Open **Settings**.
-2. Enter the current master password.
-3. Enter a new password containing at least 8 characters.
-4. Select **Change**.
+- change the master password;
+- choose the Dark, White, or Nord theme;
+- enable or disable interface sounds for the current session;
+- set sound volume from 0 to 100.
 
-The vault is then encrypted using a key derived from the new master password.
+Theme and volume are saved in `client/assets/config.conf`. The sound-enabled toggle itself is not currently persisted between launches.
 
-## Local data
+### CSV import and export
 
-| Data | Location | Contents |
-|---|---|---|
-| Encrypted vault | `client/assets/save/save.save` | Authenticated encrypted credential data |
-| Session log | `client/assets/logs/pwd-session.log` | Internal events for the current application run |
+The toolbar contains import and export actions. Import currently expects a header row and reads the first three comma-separated columns as:
 
-The diagnostic log is designed not to contain master passwords, stored passwords, logins, service names, decrypted JSON, or clipboard contents.
+```csv
+url,login,password
+https://example.com,user@example.com,secret
+```
 
-Back up the encrypted vault while the application is closed. Never publish it, even though it is encrypted.
+The `https://` prefix is removed from imported service names. Empty records are skipped. Export writes to `client/assets/export/export.csv`.
 
-## Current limitations
+> [!CAUTION]
+> CSV files are plaintext and expose every exported login and password. Store them securely and delete them when they are no longer needed.
 
-- no prebuilt installer or package;
-- no synchronization between devices;
-- no automatic backup system;
+> [!NOTE]
+> CSV support is experimental. Quoted commas, embedded newlines, and a lossless export/import round trip are not supported reliably yet.
+
+## Local files
+
+Paths below are relative to the repository when the desktop application is run from the recommended location.
+
+| Path | Purpose | Protected? |
+|---|---|:---:|
+| `client/assets/save/save.save` | Encrypted credential vault | Yes |
+| `client/assets/config.conf` | Theme and volume preferences | No |
+| `client/assets/logs/pwd-session.log` | Diagnostic events from the current session | No |
+| `client/assets/export/export.csv` | Optional CSV export containing credentials | **No** |
+
+The log is recreated for each run and is designed not to include passwords, logins, service names, decrypted JSON, or clipboard contents. Back up the encrypted vault only while the application is closed, and never publish vault or CSV files.
+
+## Android port
+
+An experimental, isolated Qt/C++ Android port lives in [`android-port/`](android-port/README.md). It uses Android's private application-data directory, requests neither network nor external-storage permissions, and excludes the vault from Android backup.
+
+The port requires Qt 6.8 or newer with an Android `arm64-v8a` kit. It has not yet completed a real-device validation pass, so the desktop client remains the primary supported implementation. See the [Android build guide](android-port/README.md) for setup and packaging instructions.
+
+## Project status and limitations
+
+- no prebuilt desktop packages or installers;
+- no synchronization, cloud storage, or account recovery;
+- no automatic vault backups;
 - no automatic clipboard clearing;
-- no versioned vault format or migration system yet;
+- no versioned vault format or migration system;
+- CSV support is incomplete and exports plaintext secrets;
+- no project-specific automated test suite yet;
 - no independent security audit;
-- Windows and macOS builds are not currently verified by CI.
+- Android packaging and device behavior still require validation.
 
-## Documentation
+## Repository layout
 
-| Document | Audience | Contents |
-|---|---|---|
-| [README.md](README.md) | Users | Installation, platform support, and daily usage |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Architecture, security rules, development workflow, and testing |
+```text
+.
+├── client/                  desktop Qt client and bundled assets
+│   ├── src/
+│   │   ├── controllers/    application and persistence operations
+│   │   ├── crypto/         libsodium wrapper and vault container
+│   │   ├── domain/         credential, configuration, and error models
+│   │   ├── generate/       password generation and strength estimation
+│   │   ├── logs/           session logger
+│   │   ├── ui/             Qt widgets and dialogs
+│   │   └── utils/          CSV parser and shared helpers
+│   └── assets/             themes, icons, sounds, and local runtime data
+├── android-port/           separate experimental Android application
+├── img/                    documentation screenshots
+├── .github/workflows/      cross-platform CI configuration
+├── CMakeLists.txt          desktop project entry point
+└── CONTRIBUTING.md         contributor documentation
+```
+
+## Contributing
+
+Architecture notes, security rules, local checks, and the development workflow are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+To run all tests registered with CMake:
+
+```bash
+ctest --test-dir build --build-config Release --output-on-failure
+```
+
+The project does not currently register its own automated tests; this command primarily provides a stable workflow for future test targets.
 
 ## License
 
