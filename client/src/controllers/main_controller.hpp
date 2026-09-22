@@ -27,7 +27,6 @@ public:
     std::expected<std::uint32_t, err::Error> addService(const Service& service);
     std::expected<void, err::Error> removeService(const std::size_t& index);
     std::expected<void, err::Error> rewriteService(const Service& service, const std::size_t& index);
-    std::uint32_t nextServiceIndex();
 
     std::expected<void, err::Error> importCSV(const std::string& file_path);
     std::expected<void, err::Error> exportCSV();

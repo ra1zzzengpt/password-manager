@@ -237,19 +237,12 @@ std::expected<void, err::Error> StorageController::rewriteService(const Service&
     return {};
 }
 
-std::uint32_t StorageController::nextServiceIndex() {
-    if (services_.empty()) {
-        return 0;
-    }
-    return services_.size() - 1;
-}
-
 std::expected<void, err::Error> StorageController::importCSV(const std::string& file_path) {
     if (auto res = CSVParser::parseCSV(file_path); !res.has_value()) {
         return std::unexpected{res.error()};
     } else {
         for (const auto& service : res.value()) {
-            services_.emplace(nextServiceIndex(), service);
+            services_.emplace(takeNextId(), service);
         }
     }
     return save();

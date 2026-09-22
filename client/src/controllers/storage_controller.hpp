@@ -46,8 +46,6 @@ public:
 
     const std::unordered_map<std::uint32_t, Service>& services();
 
-    std::uint32_t nextServiceIndex();
-
     // --------------- CSV --------------------------
 
     std::expected<void, err::Error> importCSV(const std::string& file_path);
