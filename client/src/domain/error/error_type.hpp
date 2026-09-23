@@ -9,6 +9,7 @@ namespace err
         FileStreamError,
         RenameFailed,
         DeleteFailed,
+        FileIsTooBig,
     };
 
     enum class SodiumError

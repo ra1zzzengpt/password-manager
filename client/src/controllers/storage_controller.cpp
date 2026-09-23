@@ -98,7 +98,10 @@ std::expected<void, err::Error> StorageController::load()
         std::streamsize file_size{file.tellg()};
         file.seekg(0, std::ios::beg);
 
-        // todo bug whats if file will be VERY BIG?
+        if (file_size > 50000000)
+        {
+            return std::unexpected{err::Error{.type = err::StorageError::FileIsTooBig, .message = "file is too big"}};
+        }
 
         std::vector<uint8_t> data(file_size);
         file.read(reinterpret_cast<std::istream::char_type *>(data.data()), file_size);
