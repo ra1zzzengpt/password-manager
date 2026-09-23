@@ -26,4 +26,6 @@ private:
     GenerationLevel generation_level_{GenerationLevel::Medium};
     // todo error type
     [[nodiscard]] QWidget* serviceToWidget(std::uint32_t id);
+    QIcon copy_login_icon_ = QIcon(":/assets/icons/copy_login.png");
+    QIcon copy_password_icon_ = QIcon(":/assets/icons/copy_password.png");
 };

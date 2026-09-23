@@ -16,6 +16,8 @@
 #include <generate/generator.hpp>
 #include <QFileDialog>
 #include <QLayoutItem>
+#include <thread>
+#include <QThread>
 #include <utils/transform.hpp>
 
 #include "add_service_dialog.hpp"
@@ -47,6 +49,17 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
     serv_layout->addWidget(import_button);
     serv_layout->addWidget(export_button);
 
+    QHBoxLayout* search_layout = new QHBoxLayout();
+
+    QLineEdit* search_by_name = new QLineEdit(this);
+    search_by_name->setPlaceholderText("service name filer...");
+
+    QLineEdit* search_by_login = new QLineEdit(this);
+    search_by_login->setPlaceholderText("login filter...");
+
+    search_layout->addWidget(search_by_name);
+    search_layout->addWidget(search_by_login);
+
     // ------------------------- SCROLL AREA -----------------------------
     QScrollArea* scroll_area = new QScrollArea(this);
     scroll_area->setWidgetResizable(true);
@@ -69,6 +82,7 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
     });
 
     rootLayout->addLayout(serv_layout);
+    rootLayout->addLayout(search_layout);
     rootLayout->addWidget(scroll_area);
 
     connect(import_button, &QPushButton::clicked, [this] {
@@ -99,6 +113,44 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         }
         QMessageBox::information(this, "Information", "Success.\n Saved to assets/export/export.csv");
     });
+
+    connect(search_by_name, &QLineEdit::textChanged, [this](const QString& text)
+    {
+        QLayoutItem* item;
+        // todo mb try hashmap ID -> ID in layout for optimize
+        while ((item = container_layout_->takeAt(0)) != nullptr)
+        {
+            delete item->widget();
+            delete item;
+        }
+        for (const auto& [id,service] : controller_.getServices())
+        {
+            if (controller_.getServices().at(id).name.contains(text.toStdString()))
+            {
+                QWidget* serviceWidget = serviceToWidget(id);
+                container_layout_->addWidget(serviceWidget);
+            }
+        }
+    });
+
+    connect(search_by_login, &QLineEdit::textChanged, [this](const QString& text)
+    {
+        QLayoutItem* item;
+        // todo mb try hashmap ID -> ID in layout for optimize
+        while ((item = container_layout_->takeAt(0)) != nullptr)
+        {
+            delete item->widget();
+            delete item;
+        }
+        for (const auto& [id,service] : controller_.getServices())
+        {
+            if (controller_.getServices().at(id).login.contains(text.toStdString()))
+            {
+                QWidget* serviceWidget = serviceToWidget(id);
+                container_layout_->addWidget(serviceWidget);
+            }
+        }
+    });
 }
 
 // todo refresh now very big data taking function full rework this
@@ -114,14 +166,12 @@ void MainWidget::refresh()
         QWidget* serviceWidget = serviceToWidget(id);
         container_layout_->addWidget(serviceWidget);
     }
+    std::cout << controller_.getServices().size() << std::endl;
 }
 
 QWidget* MainWidget::serviceToWidget(const std::uint32_t id)
 {
-    QIcon edit_icon = QIcon(":/assets/icons/edit.png");
-    QIcon copy_login_icon = QIcon(":/assets/icons/copy_login.png");
-    QIcon copy_password_icon = QIcon(":/assets/icons/copy_password.png");
-    QServiceCardWidget* serviceWidget = new QServiceCardWidget(controller_,id,copy_login_icon,copy_password_icon,edit_icon,sound_controller_,this);
+    QServiceCardWidget* serviceWidget = new QServiceCardWidget(controller_,id,copy_login_icon_,copy_password_icon_,sound_controller_,this);
 
     connect(serviceWidget, &QServiceCardWidget::loginCopyButtonClicked, [this](const std::uint32_t& id) {
         QClipboard* clipboard = QApplication::clipboard();
