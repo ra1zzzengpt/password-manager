@@ -30,8 +30,6 @@ add_library(pwd-core STATIC
         src/ui/window.hpp
         src/ui/add_service_dialog.cpp
         src/ui/add_service_dialog.hpp
-        src/ui/current_service_dialog.cpp
-        src/ui/current_service_dialog.hpp
         src/ui/custom_list_widget.cpp
         src/ui/custom_list_widget.hpp
         src/ui/custom_widgets/service_card_widget.cpp
