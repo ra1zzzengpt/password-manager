@@ -37,10 +37,6 @@ std::expected<std::vector<Service>, err::Error> CSVParser::parseCSV(std::string 
             std::getline(ss, service.login, ',');
             std::getline(ss, service.password, ',');
 
-            if (service.name.contains("https://")) {
-                service.name.erase(0,8);
-            }
-
             if ((service.name == "url" && service.login == "login" && service.password == "password") || service.name.empty() || service.login.empty() || service.password.empty()) {
                 continue;
             }
@@ -67,7 +63,7 @@ std::expected<void, err::Error> CSVParser::exportCSV(std::string file_path, cons
         return std::unexpected{err::Error{.type = err::StorageError::OpenFileFailed, .message = "file not found."}};
     }
     for (const Service& service : services | std::views::values) {
-        file << '"' << "https://" << service.name << "\",\"" << service.login << "\",\"" << service.password << "\",\"" << service.created_at << ";\n";
+        file << '"' << service.name << "\",\"" << service.login << "\",\"" << service.password << "\",\"" << service.created_at << ";\n";
     }
     return {};
 }
