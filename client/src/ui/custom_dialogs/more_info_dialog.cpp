@@ -165,7 +165,7 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        this->close();
+        this->deleteLater();
     });
 
     connect(edit_on, &QCheckBox::toggled, [=,this](const bool state)
@@ -255,7 +255,7 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
         {
             emit updateService(service);
         }
-        this->close();
+        this->deleteLater();
     });
 
     connect(level_button, &QPushButton::clicked, [this]
@@ -292,7 +292,7 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
             {
                 emit deleteService();
             }
-            this->close();
+            this->deleteLater();
         }
     });
 }

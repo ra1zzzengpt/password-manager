@@ -91,6 +91,7 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
             }
             QMessageBox::information(this,"Information","Successful.");
         }
+        message_box->deleteLater();
     });
 
     connect(next_button,&QPushButton::clicked,[=,this]()

@@ -28,7 +28,6 @@ QServiceCardWidget::QServiceCardWidget(
     const std::uint32_t& id,
     const QIcon& copy_login_icon,
     const QIcon& copy_password_icon,
-    const QIcon& more_info_icon,
     SoundController& sound_controller,
     QWidget *parent)
 : controller_(controller),
@@ -64,9 +63,6 @@ QFrame(parent)
     passwordCopyButton_ = new QPushButton(this);
     passwordCopyButton_->setIcon(copy_password_icon);
 
-    moreInfoButton_ = new QPushButton(this);
-    moreInfoButton_->setIcon(more_info_icon);
-
     connect(loginCopyButton_, &QPushButton::clicked, [this]
     {
         if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
@@ -83,24 +79,9 @@ QFrame(parent)
         }
         emit passwordCopyButtonClicked(id_);
     });
-    connect(moreInfoButton_, &QPushButton::clicked, [=,this]
-    {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        QMoreInfoDialog* more_info_dialog = new QMoreInfoDialog(controller_,id_,sound_controller_,this);
-        connect(more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
-        connect(more_info_dialog, &QMoreInfoDialog::deleteService, [this]
-        {
-            this->close();
-        });
-        more_info_dialog->exec();
-    });
 
     rootLayout->addWidget(loginCopyButton_);
     rootLayout->addWidget(passwordCopyButton_);
-    rootLayout->addWidget(moreInfoButton_);
 
     createdAtLabel_ = new QLabel(this);
     createdAtLabel_->setText(controller_.getServices().at(id_).created_at.c_str());
@@ -119,7 +100,7 @@ void QServiceCardWidget::mousePressEvent(QMouseEvent* event)
         connect(more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
         connect(more_info_dialog, &QMoreInfoDialog::deleteService, [this]
         {
-            this->close();
+            this->deleteLater();
         });
         more_info_dialog->exec();
         event->accept();
