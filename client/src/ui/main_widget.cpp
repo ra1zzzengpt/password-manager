@@ -166,7 +166,6 @@ void MainWidget::refresh()
         QWidget* serviceWidget = serviceToWidget(id);
         container_layout_->addWidget(serviceWidget);
     }
-    std::cout << controller_.getServices().size() << std::endl;
 }
 
 QWidget* MainWidget::serviceToWidget(const std::uint32_t id)
