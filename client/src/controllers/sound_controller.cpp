@@ -19,6 +19,13 @@ SoundController::SoundController(const std::uint32_t volume) : volume_(static_ca
     notification_->setVolume(volume_);
 }
 
+SoundController::~SoundController()
+{
+    type_->deleteLater();
+    click_->deleteLater();
+    notification_->deleteLater();
+}
+
 std::expected<void, err::Error> SoundController::playSound(const SoundType& sound) const
 {
     if (volume_ == 0 || !soundsEnabled_)

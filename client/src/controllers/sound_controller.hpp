@@ -21,6 +21,8 @@ enum class SoundType
 class SoundController {
 public:
     explicit SoundController(std::uint32_t volume);
+    ~SoundController();
+
     [[nodiscard]] std::expected<void, err::Error> playSound(const SoundType& sound) const;
 
     [[nodiscard]] std::uint32_t getVolume() const;
