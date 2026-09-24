@@ -55,7 +55,7 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
     QStackedWidget* stack = new QStackedWidget(this);
 
     EntryWidget* entry_widget = new EntryWidget(controller_,sound_controller_,stack);
-    MainWidget* main_widget = new MainWidget(controller_,sound_controller_,stack); // todo to signals work
+    MainWidget* main_widget = new MainWidget(controller_,sound_controller_,stack);
 
     stack->addWidget(entry_widget);
     stack->addWidget(main_widget);

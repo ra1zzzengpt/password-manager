@@ -187,7 +187,6 @@ std::expected<void,err::Error> StorageController::setMasterPassword(const std::s
 
 std::expected<void, err::Error> StorageController::changeMasterPassword(const std::string& old_password, const std::string &password)
 {
-    // todo think .getMasterPassword
     if (const std::expected<void, err::Error> set_res = sodium_.setMasterPassword(old_password); !set_res.has_value())
     {
         logs_.warning_log("Master password update rejected");
