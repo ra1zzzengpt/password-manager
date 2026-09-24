@@ -63,8 +63,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     QLineEdit* login_input = new QLineEdit(this);
     login_input->setPlaceholderText("login...");
 
-    // todo position check
-
     QCustomListWidget* custom_list_widget_login = new QCustomListWidget(this);
     custom_list_widget_login->addOptions({"@gmail.com","@protonmail.com","@yandex.ru","@outlook.com","@yahoo.com"});
     custom_list_widget_login->setIcon(mail_icon);
@@ -108,7 +106,7 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
 
     options->addWidget(generating_checkbox);
     options->addWidget(generation_combo_box);
-    // TODO: MAKE MORE FLAGS
+    // TODO: ADD GENERATE EASY TO REMEMBER
 
     // ---------------------- ADD BUTTON ---------------------------
     QHBoxLayout* low_layout = new QHBoxLayout();
@@ -171,8 +169,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
                 generation_level_ = GenerationLevel::Medium;
         }
     });
-
-    // todo парсить по строке при нажатии . вылезает список (кнопка скрытая смещается)
 
     connect(custom_list_widget, &QCustomListWidget::optionSelected, [=,this](const QString& text) {
         if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())

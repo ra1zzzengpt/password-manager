@@ -34,10 +34,6 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
     hbox_button_layout->addWidget(delete_button);
     hbox_button_layout->addWidget(next_button);
 
-    QLabel* error = new QLabel(this);
-    error->setAlignment(Qt::AlignCenter);
-    error->setObjectName("error");
-
     connect(password_input, &QLineEdit::textChanged, this, [this]() {
         if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value()) {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
@@ -47,15 +43,14 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
 
     connect(password_input,&QLineEdit::returnPressed,[=,this]()
     {
-        error->setText(QString());
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
         {
-            error->setText(QString(set_result.error().message.c_str()));
+            QMessageBox::critical(this, "Error",set_result.error().message.c_str());
             return;
         }
         if (const std::expected<void, err::Error> load_result = controller_.loadStorage(); !load_result.has_value())
         {
-            error->setText(QString(load_result.error().message.c_str()));
+            QMessageBox::critical(this, "Error",load_result.error().message.c_str());
             return;
         }
         emit unlocked();
@@ -66,7 +61,7 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
         window()->close();
     });
 
-    connect(delete_button,&QPushButton::clicked,[this,error]()
+    connect(delete_button,&QPushButton::clicked,[this]()
     {
         if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value()) {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
@@ -86,7 +81,7 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
         {
             if (const std::expected<void, err::Error> delete_res = controller_.deleteStorage(); !delete_res.has_value())
             {
-                error->setText(QString(delete_res.error().message.c_str()));
+                QMessageBox::critical(this, "Error",delete_res.error().message.c_str());
                 return;
             }
             QMessageBox::information(this,"Information","Successful.");
@@ -99,15 +94,14 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
         if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value()) {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        error->setText(QString());
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
         {
-            error->setText(QString(set_result.error().message.c_str()));
+            QMessageBox::critical(this, "Error",set_result.error().message.c_str());
             return;
         }
         if (const std::expected<void, err::Error> load_result = controller_.loadStorage(); !load_result.has_value())
         {
-            error->setText(QString(load_result.error().message.c_str()));
+            QMessageBox::critical(this, "Error",load_result.error().message.c_str());
             return;
         }
         emit unlocked();
@@ -118,6 +112,5 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
     layout->addWidget(entry_label);
     layout->addWidget(password_input);
     layout->addLayout(hbox_button_layout);
-    layout->addWidget(error);
     layout->addStretch();
 }

@@ -62,11 +62,6 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
     password_group_layout->addWidget(new_password);
     password_group_layout->addWidget(password_button);
 
-    QLabel* error = new QLabel(this);
-    error->setAlignment(Qt::AlignCenter);
-    error->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-    error->setObjectName("error");
-
     // --- SFX ---
 
     QGroupBox* sfx_groupbox = new QGroupBox("SFX", this);
@@ -153,10 +148,9 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        error->clear();
         if (const std::expected<void, err::Error> set_res = controller_.changeMasterPassword(old_password->text().toStdString(),new_password->text().toStdString()); !set_res.has_value())
         {
-            error->setText(QString{set_res.error().message.c_str()});
+            QMessageBox::critical(this, "Error",set_res.error().message.c_str());
         } else
         {
             new_password->clear();
@@ -209,7 +203,6 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
 
     left_layout->addWidget(password_group);
     left_layout->addWidget(sfx_groupbox);
-    left_layout->addWidget(error);
 
     right_layout->addWidget(theme_groupbox);
 

@@ -12,7 +12,7 @@ class EntryWidget final : public QWidget
 {
     Q_OBJECT
 
-    // todo will be add SoundController or SoundLibrary for playing any sound on screen-widget
+
     public:
         explicit EntryWidget(MainController& controller, SoundController& sound_controller, QWidget* parent = nullptr);
 
