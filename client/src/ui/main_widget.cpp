@@ -114,7 +114,7 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         QMessageBox::information(this, "Information", "Success.\n Saved to assets/export/export.csv");
     });
 
-    connect(search_by_name, &QLineEdit::textChanged, [this](const QString& text)
+    connect(search_by_name, &QLineEdit::textChanged, [this,search_by_login](const QString& text)
     {
         QLayoutItem* item;
         // todo mb try hashmap ID -> ID in layout for optimize
@@ -125,7 +125,7 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         }
         for (const auto& [id,service] : controller_.getServices())
         {
-            if (controller_.getServices().at(id).name.contains(text.toStdString()))
+            if (controller_.getServices().at(id).login.contains(search_by_login->text().toStdString()) && controller_.getServices().at(id).name.contains(text.toStdString()))
             {
                 QWidget* serviceWidget = serviceToWidget(id);
                 container_layout_->addWidget(serviceWidget);
@@ -133,7 +133,7 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         }
     });
 
-    connect(search_by_login, &QLineEdit::textChanged, [this](const QString& text)
+    connect(search_by_login, &QLineEdit::textChanged, [this,search_by_name](const QString& text)
     {
         QLayoutItem* item;
         // todo mb try hashmap ID -> ID in layout for optimize
@@ -144,7 +144,7 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         }
         for (const auto& [id,service] : controller_.getServices())
         {
-            if (controller_.getServices().at(id).login.contains(text.toStdString()))
+            if (controller_.getServices().at(id).login.contains(text.toStdString()) && controller_.getServices().at(id).name.contains(search_by_name->text().toStdString()))
             {
                 QWidget* serviceWidget = serviceToWidget(id);
                 container_layout_->addWidget(serviceWidget);
@@ -153,7 +153,6 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
     });
 }
 
-// todo refresh now very big data taking function full rework this
 void MainWidget::refresh()
 {
     QLayoutItem* item;

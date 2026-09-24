@@ -22,9 +22,7 @@ private:
     MainController& controller_;
     SoundController& sound_controller_;
     QVBoxLayout* container_layout_ = nullptr;
-    QLabel* error_ = nullptr;
     GenerationLevel generation_level_{GenerationLevel::Medium};
-    // todo error type
     [[nodiscard]] QWidget* serviceToWidget(std::uint32_t id);
     QIcon copy_login_icon_ = QIcon(":/assets/icons/copy_login.png");
     QIcon copy_password_icon_ = QIcon(":/assets/icons/copy_password.png");
