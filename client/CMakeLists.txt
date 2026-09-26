@@ -1,42 +1,21 @@
 add_library(pwd-core STATIC
         src/controllers/configuration_controller.cpp
-        src/controllers/configuration_controller.hpp
-        src/domain/config.hpp
         src/controllers/main_controller.cpp
         src/crypto/sodium.cpp
-        src/crypto/sodium.hpp
         src/controllers/storage_controller.cpp
-        src/controllers/storage_controller.hpp
-        src/domain/error/error.hpp
         src/logs/logs.cpp
-        src/logs/logs.hpp
-        src/domain/error/error_type.hpp
-        src/domain/service.hpp
         src/domain/service.cpp
         src/ui/entry_widget.cpp
-        src/ui/entry_widget.hpp
         src/ui/main_widget.cpp
-        src/ui/main_widget.hpp
-        src/constants/paths.hpp
         src/crypto/helper/sodium_info.cpp
-        src/crypto/helper/sodium_info.hpp
         src/generate/generator.cpp
-        src/generate/generator.hpp
-        src/utils/transform.hpp
-        src/constants/symbols.hpp
         src/ui/settings_dialog.cpp
-        src/ui/settings_dialog.hpp
         src/ui/window.cpp
-        src/ui/window.hpp
         src/ui/add_service_dialog.cpp
-        src/ui/add_service_dialog.hpp
         src/ui/custom_list_widget.cpp
-        src/ui/custom_list_widget.hpp
         src/ui/custom_widgets/service_card_widget.cpp
         src/controllers/sound_controller.cpp
-        src/controllers/sound_controller.hpp
         src/ui/custom_dialogs/more_info_dialog.cpp
-        src/ui/custom_dialogs/more_info_dialog.hpp
 )
 
 target_include_directories(
