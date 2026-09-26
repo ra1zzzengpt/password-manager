@@ -8,10 +8,8 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QGroupBox>
-#include <QPushButton>
 #include <QMessageBox>
 #include <QSpinBox>
-#include <QToolButton>
 #include <QMenu>
 
 #include "domain/service.hpp"

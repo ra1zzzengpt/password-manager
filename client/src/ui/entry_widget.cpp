@@ -1,11 +1,8 @@
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QFont>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QMediaPlayer>
-#include <QAudioOutput>
 #include <QUrl>
 #include <ui/entry_widget.hpp>
 

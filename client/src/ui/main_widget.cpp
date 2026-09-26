@@ -1,23 +1,15 @@
 #include "main_widget.hpp"
 
-#include <iostream>
 #include <QApplication>
 #include <QVBoxLayout>
 #include <QComboBox>
-#include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QSpinBox>
 #include <QScrollArea>
 #include <QClipboard>
 #include <QMessageBox>
 #include <QStandardItemModel>
-#include <generate/generator.hpp>
 #include <QFileDialog>
 #include <QLayoutItem>
-#include <thread>
-#include <QThread>
 #include <utils/transform.hpp>
 
 #include "add_service_dialog.hpp"
