@@ -5,8 +5,6 @@
 #include "window.hpp"
 
 #include <QMessageBox>
-#include <QStackedWidget>
-#include <QVBoxLayout>
 #include <QPushButton>
 
 #include "entry_widget.hpp"
@@ -52,19 +50,22 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
     top_layout->addStretch();
     top_layout->addWidget(settings_button);
 
-    QStackedWidget* stack = new QStackedWidget(this);
+    // QStackedWidget* stack = new QStackedWidget(this);
 
-    EntryWidget* entry_widget = new EntryWidget(controller_,sound_controller_,stack);
-    MainWidget* main_widget = new MainWidget(controller_,sound_controller_,stack);
+    EntryWidget* entry_widget = new EntryWidget(controller_,sound_controller_,this); // stack
+    // MainWidget* main_widget = new MainWidget(controller_,sound_controller_,this);
 
-    stack->addWidget(entry_widget);
-    stack->addWidget(main_widget);
+    // stack->addWidget(entry_widget);
+    // stack->addWidget(main_widget);
 
-    connect(entry_widget, &EntryWidget::unlocked, main_widget, &MainWidget::refresh);
+    // connect(entry_widget, &EntryWidget::unlocked, main_widget, &MainWidget::refresh);
 
-    connect(entry_widget, &EntryWidget::unlocked, stack, [stack, main_widget]()
+    connect(entry_widget, &EntryWidget::unlocked, this, [this,rootLayout,entry_widget]()
     {
-        stack->setCurrentWidget(main_widget);
+        entry_widget->deleteLater();
+        MainWidget* main_widget = new MainWidget(controller_,sound_controller_,this);
+        main_widget->refresh();
+        rootLayout->addWidget(main_widget);
     });
 
     connect(exit_button, &QPushButton::clicked, [this]()->void
@@ -84,5 +85,5 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
     });
 
     rootLayout->addLayout(top_layout);
-    rootLayout->addWidget(stack);
+    rootLayout->addWidget(entry_widget);
 }
