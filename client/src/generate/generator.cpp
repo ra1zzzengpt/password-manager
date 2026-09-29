@@ -4,6 +4,11 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+
+#include "constants/paths.hpp"
 
 std::string Generator::generate_random_password(const uint32_t length, const GenerationLevel& level)
 {
@@ -124,4 +129,83 @@ EntropyLevel Generator::Entropy(const std::string& password) {
         return EntropyLevel::Medium;
     }
     return EntropyLevel::High;
+}
+
+std::expected<std::string,err::Error> Generator::generate_random_seed_phrase(uint32_t length, const std::string &separator)
+{
+    std::ifstream nouns(cnt::nounsPath());
+    std::ifstream verbs(cnt::verbsPath());
+
+    if (!nouns.is_open() || !verbs.is_open())
+    {
+        return std::unexpected{err::Error{.type = err::StorageError::OpenFileFailed, .message = "can't find wordlist files"}};
+    }
+    std::uint32_t nouns_count = 0;
+    std::uint32_t verbs_count = 0;
+
+    std::string line;
+
+    while (std::getline(nouns, line))
+    {
+        nouns_count++;
+    }
+    nouns.clear();
+
+    while (std::getline(verbs, line))
+    {
+        verbs_count++;
+    }
+    verbs.clear();
+
+    std::vector<std::string> strings;
+
+    nouns.seekg(std::ios_base::beg);
+    verbs.seekg(std::ios_base::beg);
+
+    for (uint32_t i = 1; i <= length; ++i)
+    {
+        std::string word;
+        if (i % 2 != 0)
+        {
+            std::uint32_t word_index = randombytes_uniform(nouns_count);
+            std::uint32_t current_word_index = 0;
+            while (std::getline(nouns, word))
+            {
+                if (current_word_index == word_index)
+                {
+                    strings.push_back(word);
+                    break;
+                }
+                current_word_index++;
+            }
+            nouns.clear();
+            nouns.seekg(std::ios_base::beg);
+        } else
+        {
+            std::uint32_t word_index = randombytes_uniform(verbs_count);
+            std::uint32_t current_word_index = 0;
+            while (std::getline(verbs, word))
+            {
+                if (current_word_index == word_index)
+                {
+                    strings.push_back(word);
+                    break;
+                }
+                current_word_index++;
+            }
+            verbs.clear();
+            verbs.seekg(std::ios_base::beg);
+        }
+    }
+
+    std::string result;
+    for (std::uint32_t i = 0; i < strings.size(); ++i)
+    {
+        result += strings[i];
+        if (i < strings.size() - 1)
+        {
+            result += separator;
+        }
+    }
+    return result;
 }
