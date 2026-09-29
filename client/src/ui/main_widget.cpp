@@ -117,7 +117,21 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         }
         for (const auto& [id,service] : controller_.getServices())
         {
-            if (controller_.getServices().at(id).login.contains(search_by_login->text().toStdString()) && controller_.getServices().at(id).name.contains(text.toStdString()))
+            std::string name_lower = controller_.getServices().at(id).name;
+
+            std::ranges::transform(name_lower,name_lower.begin(),[](unsigned char c)
+            {
+                return std::tolower(c);
+            });
+
+            std::string login_lower = controller_.getServices().at(id).login;
+
+            std::ranges::transform(login_lower,login_lower.begin(),[](unsigned char c)
+            {
+                return std::tolower(c);
+            });
+
+            if (login_lower.contains(search_by_login->text().toLower().toStdString()) && name_lower.contains(text.toLower().toStdString()))
             {
                 QWidget* serviceWidget = serviceToWidget(id);
                 container_layout_->addWidget(serviceWidget);
@@ -136,7 +150,21 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         }
         for (const auto& [id,service] : controller_.getServices())
         {
-            if (controller_.getServices().at(id).login.contains(text.toStdString()) && controller_.getServices().at(id).name.contains(search_by_name->text().toStdString()))
+            std::string name_lower = controller_.getServices().at(id).name;
+
+            std::ranges::transform(name_lower,name_lower.begin(),[](unsigned char c)
+            {
+                return std::tolower(c);
+            });
+
+            std::string login_lower = controller_.getServices().at(id).login;
+
+            std::ranges::transform(login_lower,login_lower.begin(),[](unsigned char c)
+            {
+                return std::tolower(c);
+            });
+
+            if (login_lower.contains(text.toLower().toStdString()) && name_lower.contains(search_by_name->text().toLower().toStdString()))
             {
                 QWidget* serviceWidget = serviceToWidget(id);
                 container_layout_->addWidget(serviceWidget);
