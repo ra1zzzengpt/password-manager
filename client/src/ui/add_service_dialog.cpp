@@ -7,21 +7,22 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QComboBox>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QMessageBox>
 #include <QSpinBox>
 #include <QMenu>
+#include <QRadioButton>
 
 #include "domain/service.hpp"
 #include "domain/error/error.hpp"
 #include "generate/generator.hpp"
-#include <utils/transform.hpp>
 
 #include "custom_list_widget.hpp"
 
 AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& sound_controller, QWidget *parent) : controller_(controller), sound_controller_(sound_controller), QDialog(parent){
 
-    this->setFixedSize(900,280);
+    this->setFixedWidth(900);
     QVBoxLayout* layout = new QVBoxLayout(this);
 
     QGroupBox* group_box = new QGroupBox("Add service", this);
@@ -80,17 +81,8 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     password_input->setMinimumSize(QSize(350,16));
     password_input->setEchoMode(QLineEdit::Password);
 
-    // gen box (visible false)
-    QSpinBox* generate_box = new QSpinBox(this);
-    generate_box->setMinimum(8);
-    generate_box->setMaximum(500);
-    generate_box->setValue(8);
-    generate_box->setSingleStep(1);
-    generate_box->setVisible(false);
-
     password_layout->addWidget(password_label);
     password_layout->addWidget(password_input);
-    password_layout->addWidget(generate_box);
 
     // ------------------------ OPTIONS ----------------------------
     QHBoxLayout* options = new QHBoxLayout();
@@ -98,13 +90,73 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     QCheckBox* generating_checkbox = new QCheckBox("Generate");
     generating_checkbox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
+    QWidget* generation_options_widget = new QWidget(this);
+    generation_options_widget->setVisible(false);
+    QGridLayout* generation_options = new QGridLayout(generation_options_widget);
+    generation_options->setContentsMargins(0, 0, 0, 0);
+    generation_options->setHorizontalSpacing(10);
+    generation_options->setVerticalSpacing(6);
+
+    QRadioButton* symbols_option = new QRadioButton("Symbols", this);
+    symbols_option->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    QRadioButton* seed_phrase = new QRadioButton("Seed phrase", this);
+    seed_phrase->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
     QComboBox* generation_combo_box = new QComboBox(this);
     generation_combo_box->addItems({"Low", "Medium", "High"});
     generation_combo_box->setCurrentIndex(1);
+    generation_combo_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    options->addWidget(generating_checkbox);
-    options->addWidget(generation_combo_box);
-    // TODO: ADD GENERATE EASY TO REMEMBER
+    // gen box (visible false)
+    // todo spin sound
+    QSpinBox* generate_box = new QSpinBox(this);
+    generate_box->setMinimum(8);
+    generate_box->setMaximum(500);
+    generate_box->setValue(8);
+    generate_box->setSingleStep(1);
+    generate_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    QWidget* symbols_generation_options_widget = new QWidget(this);
+    QHBoxLayout* symbols_generation_options = new QHBoxLayout(symbols_generation_options_widget);
+    symbols_generation_options->setContentsMargins(0, 0, 0, 0);
+    symbols_generation_options->addWidget(new QLabel("Level:", this));
+    symbols_generation_options->addWidget(generation_combo_box, 1);
+    symbols_generation_options->addWidget(new QLabel("Length:", this));
+    symbols_generation_options->addWidget(generate_box, 1);
+
+    // gen box for seed
+    // todo spin sound
+    QSpinBox* generate_box_seed = new QSpinBox(this);
+    generate_box_seed->setMinimum(3);
+    generate_box_seed->setMaximum(50);
+    generate_box_seed->setValue(3);
+    generate_box_seed->setSingleStep(1);
+    generate_box_seed->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    QLineEdit* separator_line_edit = new QLineEdit(this);
+    separator_line_edit->setPlaceholderText("separator...");
+    separator_line_edit->setText("-");
+    separator_line_edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    QWidget* seed_generation_options_widget = new QWidget(this);
+    QHBoxLayout* seed_generation_options = new QHBoxLayout(seed_generation_options_widget);
+    seed_generation_options->setContentsMargins(0, 0, 0, 0);
+    seed_generation_options->addWidget(new QLabel("Words:", this));
+    seed_generation_options->addWidget(generate_box_seed, 1);
+    seed_generation_options->addWidget(new QLabel("Separator:", this));
+    seed_generation_options->addWidget(separator_line_edit, 2);
+
+    symbols_generation_options_widget->setVisible(false);
+    seed_generation_options_widget->setVisible(false);
+
+    generation_options->addWidget(symbols_option, 0, 0, Qt::AlignLeft);
+    generation_options->addWidget(symbols_generation_options_widget, 0, 1);
+    generation_options->addWidget(seed_phrase, 1, 0, Qt::AlignLeft);
+    generation_options->addWidget(seed_generation_options_widget, 1, 1);
+    generation_options->setColumnStretch(1, 1);
+
+    options->addWidget(generating_checkbox, 0, Qt::AlignLeft | Qt::AlignTop);
+    options->addWidget(generation_options_widget, 1);
 
     // ---------------------- ADD BUTTON ---------------------------
     QHBoxLayout* low_layout = new QHBoxLayout();
@@ -134,10 +186,31 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
+        password_label->setVisible(!checked);
         password_input->setVisible(!checked);
-        generate_box->setVisible(checked);
+        generation_options_widget->setVisible(checked);
+
+        if (checked)
+        {
+            symbols_option->setChecked(true);
+            symbols_generation_options_widget->setVisible(true);
+            seed_generation_options_widget->setVisible(false);
+        } else
+        {
+            symbols_generation_options_widget->setVisible(false);
+            seed_generation_options_widget->setVisible(false);
+        }
     });
 
+    connect(symbols_option, &QRadioButton::toggled, [=](const bool checked)
+    {
+        symbols_generation_options_widget->setVisible(generating_checkbox->isChecked() && checked);
+    });
+
+    connect(seed_phrase, &QRadioButton::toggled, [=](const bool checked)
+    {
+        seed_generation_options_widget->setVisible(generating_checkbox->isChecked() && checked);
+    });
 
     // COMBO BOX
     connect(generation_combo_box, &QComboBox::currentIndexChanged, [=,this](const int index)
@@ -225,35 +298,41 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
             && !login_input->text().isEmpty()
             && (!password_input->text().isEmpty() || generating_checkbox->isChecked()))
         {
-            Service service;
+            std::string password;
             if (generating_checkbox->isChecked())
             {
-                service = Service{
-                    .name = name_input->text().toStdString(),
-                    .login = login_input->text().toStdString(),
-                    .password = Generator::generate_random_password(transform<uint32_t>(generate_box->text().toStdString()).value(), generation_level_),
-                    .created_at = current_time()
-                };
-                if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
+                if (symbols_option->isChecked())
                 {
-                    QMessageBox::warning(this, "Save Error",QString(res_add.error().message.c_str()));
-                    return;
+                    password = Generator::generate_random_password(generate_box->value(), generation_level_);
                 } else
                 {
-                    addService(res_add.value());
+                    const auto result = Generator::generate_random_seed_phrase(
+                        generate_box_seed->value(), separator_line_edit->text().toStdString());
+                    if (!result.has_value())
+                    {
+                        QMessageBox::warning(this, "Generation Error", QString::fromStdString(result.error().message));
+                        return;
+                    }
+                    password = result.value();
                 }
             } else
             {
-                service = Service{.name = name_input->text().toStdString(), .login = login_input->text().toStdString(),.password = password_input->text().toStdString(),
-                .created_at = current_time()};
-                if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
-                {
-                    QMessageBox::warning(this, "Save Error",QString(res_add.error().message.c_str()));
-                    return;
-                } else
-                {
-                    addService(res_add.value());
-                }
+                password = password_input->text().toStdString();
+            }
+
+            const Service service{
+                .name = name_input->text().toStdString(),
+                .login = login_input->text().toStdString(),
+                .password = password,
+                .created_at = current_time()
+            };
+            if (const std::expected<std::uint32_t, err::Error> res_add = controller_.addService(service); !res_add.has_value())
+            {
+                QMessageBox::warning(this, "Save Error", QString::fromStdString(res_add.error().message));
+                return;
+            } else
+            {
+                addService(res_add.value());
             }
             name_input->clear();
             login_input->clear();

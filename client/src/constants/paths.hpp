@@ -36,4 +36,14 @@ namespace cnt
     {
         return getAssetsBasePath() / "save" / "save.save";
     }
+
+    inline std::filesystem::path nounsPath()
+    {
+        return getAssetsBasePath() / "wordlist" / "nouns.txt";
+    }
+
+    inline std::filesystem::path verbsPath()
+    {
+        return getAssetsBasePath() / "wordlist" /"verbs.txt";
+    }
 }
