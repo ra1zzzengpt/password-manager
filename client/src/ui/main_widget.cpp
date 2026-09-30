@@ -43,14 +43,14 @@ MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(pa
 
     QHBoxLayout* search_layout = new QHBoxLayout();
 
-    QLineEdit* search_by_name = new QLineEdit(this);
-    search_by_name->setPlaceholderText("service name filer...");
+    search_by_name_ = new QLineEdit(this);
+    search_by_name_->setPlaceholderText("service name filer...");
 
-    QLineEdit* search_by_login = new QLineEdit(this);
-    search_by_login->setPlaceholderText("login filter...");
+    search_by_login_ = new QLineEdit(this);
+    search_by_login_->setPlaceholderText("login filter...");
 
-    search_layout->addWidget(search_by_name);
-    search_layout->addWidget(search_by_login);
+    search_layout->addWidget(search_by_name_);
+    search_layout->addWidget(search_by_login_);
 
     // ------------------------- SCROLL AREA -----------------------------
     QScrollArea* scroll_area = new QScrollArea(this);
@@ -94,71 +94,9 @@ MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(pa
         QMessageBox::information(this, "Information", "Success.\n Saved to assets/export/export.csv");
     });
 
-    connect(search_by_name, &QLineEdit::textChanged, [this,search_by_login](const QString& text)
-    {
-        QLayoutItem* item;
-        // todo mb try hashmap ID -> ID in layout for optimize
-        while ((item = container_layout_->takeAt(0)) != nullptr)
-        {
-            delete item->widget();
-            delete item;
-        }
-        for (const auto& [id,service] : controller_.getServices())
-        {
-            std::string name_lower = controller_.getServices().at(id).name;
+    connect(search_by_name_, &QLineEdit::textChanged, this, &MainWidget::applyFilters);
 
-            std::ranges::transform(name_lower,name_lower.begin(),[](unsigned char c)
-            {
-                return std::tolower(c);
-            });
-
-            std::string login_lower = controller_.getServices().at(id).login;
-
-            std::ranges::transform(login_lower,login_lower.begin(),[](unsigned char c)
-            {
-                return std::tolower(c);
-            });
-
-            if (login_lower.contains(search_by_login->text().toLower().toStdString()) && name_lower.contains(text.toLower().toStdString()))
-            {
-                QWidget* serviceWidget = serviceToWidget(id);
-                container_layout_->addWidget(serviceWidget);
-            }
-        }
-    });
-
-    connect(search_by_login, &QLineEdit::textChanged, [this,search_by_name](const QString& text)
-    {
-        QLayoutItem* item;
-        // todo mb try hashmap ID -> ID in layout for optimize
-        while ((item = container_layout_->takeAt(0)) != nullptr)
-        {
-            delete item->widget();
-            delete item;
-        }
-        for (const auto& [id,service] : controller_.getServices())
-        {
-            std::string name_lower = controller_.getServices().at(id).name;
-
-            std::ranges::transform(name_lower,name_lower.begin(),[](unsigned char c)
-            {
-                return std::tolower(c);
-            });
-
-            std::string login_lower = controller_.getServices().at(id).login;
-
-            std::ranges::transform(login_lower,login_lower.begin(),[](unsigned char c)
-            {
-                return std::tolower(c);
-            });
-
-            if (login_lower.contains(text.toLower().toStdString()) && name_lower.contains(search_by_name->text().toLower().toStdString()))
-            {
-                QWidget* serviceWidget = serviceToWidget(id);
-                container_layout_->addWidget(serviceWidget);
-            }
-        }
-    });
+    connect(search_by_login_, &QLineEdit::textChanged, this, &MainWidget::applyFilters);
 }
 
 void MainWidget::refresh()
@@ -173,11 +111,13 @@ void MainWidget::refresh()
         QWidget* serviceWidget = serviceToWidget(id);
         container_layout_->addWidget(serviceWidget);
     }
+    applyFilters();
 }
 
 QWidget* MainWidget::serviceToWidget(const std::uint32_t id)
 {
     QServiceCardWidget* serviceWidget = new QServiceCardWidget(controller_,id,copy_login_icon_,copy_password_icon_,this);
+    serviceWidget->setProperty("serviceID",id);
 
     connect(serviceWidget, &QServiceCardWidget::loginCopyButtonClicked, [this](const std::uint32_t& id) {
         QClipboard* clipboard = QApplication::clipboard();
@@ -194,4 +134,26 @@ QWidget* MainWidget::serviceToWidget(const std::uint32_t id)
 void MainWidget::addService(const std::uint32_t id) {
     QWidget* serviceWidget = serviceToWidget(id);
     container_layout_->addWidget(serviceWidget);
+    applyFilters();
+}
+
+void MainWidget::applyFilters()
+{
+    for (std::uint32_t i = 0; i < container_layout_->count(); ++i)
+    {
+        auto widget = container_layout_->itemAt(i)->widget();
+        if (widget == nullptr)
+        {
+            continue;
+        }
+        std::uint32_t id = widget->property("serviceID").toUInt();
+        auto service = controller_.getServices().find(id);
+        if (service != controller_.getServices().end())
+        {
+            widget->setVisible(QString::fromStdString(service->second.name).contains(search_by_name_->text(), Qt::CaseInsensitive) && QString::fromStdString(service->second.login).contains(search_by_login_->text(), Qt::CaseInsensitive));
+        } else
+        {
+            widget->hide();
+        }
+    }
 }
