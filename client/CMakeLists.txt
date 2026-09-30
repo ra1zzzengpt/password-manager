@@ -28,7 +28,6 @@ target_link_libraries(pwd-core PRIVATE
         Qt6::Core
         Qt6::Widgets
         Qt6::Multimedia
-        Qt6::MultimediaWidgets
         sodium
         nlohmann_json::nlohmann_json
 )
@@ -76,5 +75,4 @@ target_link_libraries(password-manager PRIVATE
         Qt6::Core
         Qt6::Widgets
         Qt6::Multimedia
-        Qt6::MultimediaWidgets
 )
