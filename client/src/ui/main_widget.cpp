@@ -15,7 +15,7 @@
 #include "add_service_dialog.hpp"
 #include "custom_widgets/service_card_widget.hpp"
 
-MainWidget::MainWidget(MainController &controller, SoundController& sound_controller, QWidget* parent) : QWidget(parent), controller_(controller), sound_controller_(sound_controller)
+MainWidget::MainWidget(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout(this);
 
@@ -64,11 +64,7 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
 
     scroll_area->setWidget(container);
     connect(add_button, &QPushButton::clicked, [&,this] {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        AddServiceDialog service_dialog{controller_, sound_controller_, this};
+        AddServiceDialog service_dialog{controller_, this};
         connect(&service_dialog, &AddServiceDialog::addService, this, &MainWidget::addService);
         service_dialog.exec();
     });
@@ -78,10 +74,6 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
     rootLayout->addWidget(scroll_area);
 
     connect(import_button, &QPushButton::clicked, [this] {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         QString filepath = QFileDialog::getOpenFileName(this, "Choose csv", "/home","*.csv");
         if (filepath.isEmpty()) {
             return;
@@ -95,10 +87,6 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
     });
 
     connect(export_button, &QPushButton::clicked, [this] {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (auto res = controller_.exportCSV(); !res.has_value()) {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
             return;
@@ -189,7 +177,7 @@ void MainWidget::refresh()
 
 QWidget* MainWidget::serviceToWidget(const std::uint32_t id)
 {
-    QServiceCardWidget* serviceWidget = new QServiceCardWidget(controller_,id,copy_login_icon_,copy_password_icon_,sound_controller_,this);
+    QServiceCardWidget* serviceWidget = new QServiceCardWidget(controller_,id,copy_login_icon_,copy_password_icon_,this);
 
     connect(serviceWidget, &QServiceCardWidget::loginCopyButtonClicked, [this](const std::uint32_t& id) {
         QClipboard* clipboard = QApplication::clipboard();

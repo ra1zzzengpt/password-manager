@@ -128,13 +128,6 @@ std::expected<void, err::Error> ConfigurationController::setConfig(Config config
     return {};
 }
 
-std::expected<void, err::Error> ConfigurationController::setVolume(std::uint32_t volume)
-{
-    auto updated = config_;
-    updated.volume = volume;
-    return setConfig(std::move(updated));
-}
-
 std::expected<void, err::Error> ConfigurationController::setTheme(std::string theme)
 {
     auto updated = config_;

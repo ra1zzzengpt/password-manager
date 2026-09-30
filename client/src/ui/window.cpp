@@ -12,9 +12,9 @@
 #include "constants/paths.hpp"
 #include <ui/settings_dialog.hpp>
 
-MainWindow::MainWindow(MainController &controller, SoundController& sound_controller,
+MainWindow::MainWindow(MainController &controller,
                        ConfigurationController& configuration_controller, QApplication& app)
-    : controller_(controller), sound_controller_(sound_controller),
+    : controller_(controller),
       configuration_controller_(configuration_controller), app_(app)
 {
     QVBoxLayout* rootLayout = new QVBoxLayout(this);
@@ -52,7 +52,7 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
 
     // QStackedWidget* stack = new QStackedWidget(this);
 
-    EntryWidget* entry_widget = new EntryWidget(controller_,sound_controller_,this); // stack
+    EntryWidget* entry_widget = new EntryWidget(controller_,this); // stack
     // MainWidget* main_widget = new MainWidget(controller_,sound_controller_,this);
 
     // stack->addWidget(entry_widget);
@@ -63,7 +63,7 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
     connect(entry_widget, &EntryWidget::unlocked, this, [this,rootLayout,entry_widget]()
     {
         entry_widget->deleteLater();
-        MainWidget* main_widget = new MainWidget(controller_,sound_controller_,this);
+        MainWidget* main_widget = new MainWidget(controller_,this);
         main_widget->refresh();
         rootLayout->addWidget(main_widget);
     });
@@ -75,11 +75,7 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
 
     connect(settings_button, &QPushButton::clicked, [&]()->void
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        SettingsDialog dialog{controller_, sound_controller_,
+        SettingsDialog dialog{controller_,
                               configuration_controller_, app_, this};
         dialog.exec();
     });

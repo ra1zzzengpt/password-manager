@@ -6,21 +6,18 @@
 
 #include <controllers/main_controller.hpp>
 
-#include "controllers/sound_controller.hpp"
-
 class MainWidget final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainWidget(MainController& controller, SoundController& sound_controller, QWidget* parent = nullptr);
+    explicit MainWidget(MainController& controller, QWidget* parent = nullptr);
 
 public slots:
     void refresh();
     void addService(std::uint32_t id);
 private:
     MainController& controller_;
-    SoundController& sound_controller_;
     QVBoxLayout* container_layout_ = nullptr;
     GenerationLevel generation_level_{GenerationLevel::Medium};
     [[nodiscard]] QWidget* serviceToWidget(std::uint32_t id);

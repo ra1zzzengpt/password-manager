@@ -13,8 +13,8 @@
 
 #include "generate/generator.hpp"
 
-QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t& id, SoundController &sound_controller, QWidget *parent)
-    : QDialog(parent), sound_controller_(sound_controller), controller_(controller), id_(id)
+QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t& id, QWidget *parent)
+    : QDialog(parent), controller_(controller), id_(id)
 {
     this->setFixedSize(900,350);
     QVBoxLayout* root = new QVBoxLayout(this);
@@ -161,19 +161,11 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
 
     connect(back_button, &QPushButton::clicked, [this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         reject();
     });
 
     connect(edit_on, &QCheckBox::toggled, [=,this](const bool state)
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (state)
         {
             name_line_edit->setEnabled(true);
@@ -187,28 +179,9 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
         }
     });
 
-    connect(name_line_edit, &QLineEdit::textChanged, [this]
-    {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-    });
-
-    connect(login_line_edit, &QLineEdit::textChanged, [this]
-    {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-    });
 
     connect(password_line_edit, &QLineEdit::textChanged, [=,this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         EntropyLevel lvl = Generator::Entropy(password_line_edit->text().toStdString());
         QIcon icon;
         if (lvl == EntropyLevel::High)
@@ -226,10 +199,6 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
 
     connect(see_password, &QCheckBox::toggled, [=,this](const bool state)
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (state)
         {
             password_line_edit->setEchoMode(QLineEdit::Normal);
@@ -240,10 +209,6 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
     });
     connect(apply_button, &QPushButton::clicked, [=,this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         Service service{.name = name_line_edit->text().toStdString(),
         .login = login_line_edit->text().toStdString(),
         .password = password_line_edit->text().toStdString(),
@@ -260,10 +225,6 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
 
     connect(level_button, &QPushButton::clicked, [this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         QMessageBox::information(this, "Entropy information",
                                  "Entropy estimates how difficult a password is to guess.\n\n"
                                  "E = L × log₂(N), where L is the password length and N is the size "
@@ -278,11 +239,6 @@ QMoreInfoDialog::QMoreInfoDialog(MainController& controller, const std::uint32_t
 
     connect(delete_button, &QPushButton::clicked, [=,this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-
         if (auto result = QMessageBox::question(this, "Delete", "Are you sure you want to remove this service?"); result == QMessageBox::Yes)
         {
             if (auto res = controller_.removeService(id_); !res.has_value())

@@ -20,7 +20,7 @@
 
 #include "custom_list_widget.hpp"
 
-AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& sound_controller, QWidget *parent) : controller_(controller), sound_controller_(sound_controller), QDialog(parent){
+AddServiceDialog::AddServiceDialog(MainController& controller, QWidget *parent) : controller_(controller), QDialog(parent){
 
     this->setFixedWidth(900);
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -182,10 +182,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     // GENERATION CHECKBOX
     connect(generating_checkbox, &QCheckBox::toggled, [=,this](const bool checked)
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         password_label->setVisible(!checked);
         password_input->setVisible(!checked);
         generation_options_widget->setVisible(checked);
@@ -215,10 +211,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     // COMBO BOX
     connect(generation_combo_box, &QComboBox::currentIndexChanged, [=,this](const int index)
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         switch (index)
         {
             case 0:
@@ -242,10 +234,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     });
 
     connect(custom_list_widget, &QCustomListWidget::optionSelected, [=,this](const QString& text) {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         QString current_name = name_input->text();
         if (name_input->text().endsWith("."))
         {
@@ -255,10 +243,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     });
 
     connect(custom_list_widget_login, &QCustomListWidget::optionSelected,[=,this](const QString& text) {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         QString current_login = login_input->text();
         if (current_login.endsWith("@"))
         {
@@ -268,20 +252,12 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     });
 
     connect(login_input, &QLineEdit::textChanged, [=,this](const QString &text) {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (text.endsWith("@")) {
             custom_list_widget_login->showList();
         }
     });
 
     connect(name_input, &QLineEdit::textChanged, [=,this](const QString &text) {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (text.endsWith(".")) {
             custom_list_widget->showList();
         }
@@ -290,10 +266,6 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     // ADD BUTTON
     connect(add_button, &QPushButton::clicked, [=,this]()->void
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (!name_input->text().isEmpty()
             && !login_input->text().isEmpty()
             && (!password_input->text().isEmpty() || generating_checkbox->isChecked()))
@@ -342,18 +314,7 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
     });
     connect(cancel_button, &QPushButton::clicked, [=,this]()->void
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         reject();
-    });
-    connect(password_input, &QLineEdit::textChanged, [=,this](const QString &)
-    {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
     });
 }
 

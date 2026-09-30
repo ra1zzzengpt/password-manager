@@ -1,12 +1,7 @@
 #pragma once
 
-#include <QStackedWidget>
 #include <QWidget>
-#include <QSoundEffect>
-
 #include <controllers/main_controller.hpp>
-
-#include "controllers/sound_controller.hpp"
 
 class EntryWidget final : public QWidget
 {
@@ -14,12 +9,11 @@ class EntryWidget final : public QWidget
 
 
     public:
-        explicit EntryWidget(MainController& controller, SoundController& sound_controller, QWidget* parent = nullptr);
+        explicit EntryWidget(MainController& controller, QWidget* parent = nullptr);
 
     signals:
         void unlocked();
 
     private:
         MainController& controller_;
-        SoundController& sound_controller_;
 };
