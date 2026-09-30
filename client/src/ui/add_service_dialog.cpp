@@ -337,7 +337,7 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
             name_input->clear();
             login_input->clear();
             password_input->clear();
-            this->deleteLater();
+            accept();
         }
     });
     connect(cancel_button, &QPushButton::clicked, [=,this]()->void
@@ -346,7 +346,7 @@ AddServiceDialog::AddServiceDialog(MainController& controller, SoundController& 
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        this->deleteLater();
+        reject();
     });
     connect(password_input, &QLineEdit::textChanged, [=,this](const QString &)
     {

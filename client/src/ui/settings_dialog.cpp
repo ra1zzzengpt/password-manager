@@ -167,7 +167,7 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        this->deleteLater();
+        reject();
     });
 
     connect(volume_slider, &QSlider::valueChanged,[mini_volume](const int volume)

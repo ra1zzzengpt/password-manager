@@ -96,13 +96,13 @@ void QServiceCardWidget::mousePressEvent(QMouseEvent* event)
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        QMoreInfoDialog* more_info_dialog = new QMoreInfoDialog(controller_,id_,sound_controller_,this);
-        connect(more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
-        connect(more_info_dialog, &QMoreInfoDialog::deleteService, [this]
+        QMoreInfoDialog more_info_dialog{controller_, id_, sound_controller_, this};
+        connect(&more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
+        connect(&more_info_dialog, &QMoreInfoDialog::deleteService, [this]
         {
             this->deleteLater();
         });
-        more_info_dialog->exec();
+        more_info_dialog.exec();
         event->accept();
         return;
     }

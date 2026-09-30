@@ -68,9 +68,9 @@ MainWidget::MainWidget(MainController &controller, SoundController& sound_contro
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        AddServiceDialog* service_dialog = new AddServiceDialog{controller_,sound_controller_,this};
-        connect(service_dialog, &AddServiceDialog::addService, this, &MainWidget::addService);
-        service_dialog->exec();
+        AddServiceDialog service_dialog{controller_, sound_controller_, this};
+        connect(&service_dialog, &AddServiceDialog::addService, this, &MainWidget::addService);
+        service_dialog.exec();
     });
 
     rootLayout->addLayout(serv_layout);

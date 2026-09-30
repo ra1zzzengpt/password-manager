@@ -79,9 +79,9 @@ MainWindow::MainWindow(MainController &controller, SoundController& sound_contro
         {
             QMessageBox::warning(this, "Warning", res.error().message.c_str());
         }
-        SettingsDialog* dialog = new SettingsDialog(controller_, sound_controller_,
-                                                    configuration_controller_, app_, this);
-        dialog->exec();
+        SettingsDialog dialog{controller_, sound_controller_,
+                              configuration_controller_, app_, this};
+        dialog.exec();
     });
 
     rootLayout->addLayout(top_layout);
