@@ -11,10 +11,10 @@
 #include <QFile>
 #include <ui/settings_dialog.hpp>
 
-SettingsDialog::SettingsDialog(MainController &controller, SoundController& sound_controller,
+SettingsDialog::SettingsDialog(MainController &controller,
                                ConfigurationController& configuration_controller, QApplication& app,
                                QWidget *parent)
-    : QDialog(parent), controller_(controller), sound_controller_(sound_controller),
+    : QDialog(parent), controller_(controller),
       configuration_controller_(configuration_controller), app_(app)
 {
     this->setFixedSize(600,390);
@@ -62,37 +62,6 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
     password_group_layout->addWidget(new_password);
     password_group_layout->addWidget(password_button);
 
-    // --- SFX ---
-
-    QGroupBox* sfx_groupbox = new QGroupBox("SFX", this);
-    sfx_groupbox->setAlignment(Qt::AlignCenter);
-
-    QVBoxLayout* sfx_layout = new QVBoxLayout(sfx_groupbox);
-
-    QHBoxLayout* volume_layout = new QHBoxLayout();
-
-    QLabel* mini_volume = new QLabel(this);
-    mini_volume->setObjectName("miniLabel");
-    mini_volume->setText("Volume: " + QString::number(configuration_controller_.config().volume));
-
-    QCheckBox* sound_enabled = new QCheckBox(this);
-    sound_enabled->setText("Sound Enabled");
-    sound_enabled->setChecked(sound_controller_.isSoundEnabled());
-
-    volume_layout->addWidget(mini_volume);
-    volume_layout->addWidget(sound_enabled);
-
-    QSlider* volume_slider = new QSlider(this);
-    volume_slider->setOrientation(Qt::Horizontal);
-    volume_slider->setMinimum(0);
-    volume_slider->setMaximum(100);
-    volume_slider->setValue(static_cast<int>(configuration_controller_.config().volume));
-    mini_volume->setEnabled(sound_enabled->isChecked());
-    volume_slider->setEnabled(sound_enabled->isChecked());
-
-    sfx_layout->addLayout(volume_layout);
-    sfx_layout->addWidget(volume_slider);
-
     QVBoxLayout* right_layout = new QVBoxLayout();
 
     QGroupBox* theme_groupbox = new QGroupBox("Theme", this);
@@ -120,34 +89,8 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
     else if (current_theme == "dark") dark_theme->setChecked(true);
     else if (current_theme == "nord") nord_theme->setChecked(true);
 
-    connect(sound_enabled, &QCheckBox::toggled, [=,this](const bool state)
-    {
-        mini_volume->setEnabled(state);
-        volume_slider->setEnabled(state);
-    });
-
-    connect(old_password, &QLineEdit::textChanged,[this]
-    {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-    });
-
-    connect(new_password, &QLineEdit::textChanged,[this]
-    {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-    });
-
     connect(new_password, &QLineEdit::returnPressed, [=,this]()
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (const std::expected<void, err::Error> set_res = controller_.changeMasterPassword(old_password->text().toStdString(),new_password->text().toStdString()); !set_res.has_value())
         {
             QMessageBox::critical(this, "Error",set_res.error().message.c_str());
@@ -163,22 +106,12 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
 
     connect(back_button, &QPushButton::clicked,[this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        this->deleteLater();
-    });
-
-    connect(volume_slider, &QSlider::valueChanged,[mini_volume](const int volume)
-    {
-        mini_volume->setText("Volume: " + QString::number(volume));
+        reject();
     });
 
     connect(apply_button, &QPushButton::clicked, [=, this]
     {
         Config updated = configuration_controller_.config();
-        updated.volume = static_cast<std::uint32_t>(volume_slider->value());
         if (white_theme->isChecked()) updated.theme = "white";
         else if (dark_theme->isChecked()) updated.theme = "dark";
         else if (nord_theme->isChecked()) updated.theme = "nord";
@@ -196,13 +129,10 @@ SettingsDialog::SettingsDialog(MainController &controller, SoundController& soun
             QMessageBox::warning(this, "Warning", QString::fromStdString(result.error().message));
             return;
         }
-        sound_controller_.setVolume(updated.volume);
-        sound_controller_.setSoundEnabled(sound_enabled->isChecked());
         app_.setStyleSheet(style_sheet);
     });
 
     left_layout->addWidget(password_group);
-    left_layout->addWidget(sfx_groupbox);
 
     right_layout->addWidget(theme_groupbox);
 

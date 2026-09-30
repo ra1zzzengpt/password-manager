@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QHBoxLayout>
-#include <QMessageBox>
 #include <QMouseEvent>
 
 #include "ui/custom_dialogs/more_info_dialog.hpp"
@@ -28,10 +27,8 @@ QServiceCardWidget::QServiceCardWidget(
     const std::uint32_t& id,
     const QIcon& copy_login_icon,
     const QIcon& copy_password_icon,
-    SoundController& sound_controller,
     QWidget *parent)
 : controller_(controller),
-sound_controller_(sound_controller),
 id_(id),
 QFrame(parent)
 {
@@ -65,18 +62,10 @@ QFrame(parent)
 
     connect(loginCopyButton_, &QPushButton::clicked, [this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         emit loginCopyButtonClicked(id_);
     });
     connect(passwordCopyButton_, &QPushButton::clicked, [this]
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         emit passwordCopyButtonClicked(id_);
     });
 
@@ -92,17 +81,13 @@ void QServiceCardWidget::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value())
-        {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        QMoreInfoDialog* more_info_dialog = new QMoreInfoDialog(controller_,id_,sound_controller_,this);
-        connect(more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
-        connect(more_info_dialog, &QMoreInfoDialog::deleteService, [this]
+        QMoreInfoDialog more_info_dialog{controller_, id_, this};
+        connect(&more_info_dialog, &QMoreInfoDialog::updateService, this, &QServiceCardWidget::updateService);
+        connect(&more_info_dialog, &QMoreInfoDialog::deleteService, [this]
         {
             this->deleteLater();
         });
-        more_info_dialog->exec();
+        more_info_dialog.exec();
         event->accept();
         return;
     }

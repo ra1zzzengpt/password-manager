@@ -4,14 +4,13 @@
 #include <QLabel>
 
 #include "controllers/main_controller.hpp"
-#include "controllers/sound_controller.hpp"
 #include "domain/service.hpp"
 
 class QServiceCardWidget : public QFrame
 {
     Q_OBJECT
 public:
-    explicit QServiceCardWidget(MainController& controller, const std::uint32_t& id, const QIcon& copy_login_icon, const QIcon& copy_password_icon, SoundController& sound_controller, QWidget *parent = nullptr);
+    explicit QServiceCardWidget(MainController& controller, const std::uint32_t& id, const QIcon& copy_login_icon, const QIcon& copy_password_icon, QWidget *parent = nullptr);
 
     void setServiceNameLabel(const QString& text);
     void setLoginLabel(const QString& text);
@@ -29,7 +28,6 @@ protected:
 private:
     std::uint32_t id_;
     MainController& controller_;
-    SoundController& sound_controller_;
 
     QLabel* serviceNameLabel_;
     QLabel* loginLabel_;

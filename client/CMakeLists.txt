@@ -14,7 +14,6 @@ add_library(pwd-core STATIC
         src/ui/add_service_dialog.cpp
         src/ui/custom_list_widget.cpp
         src/ui/custom_widgets/service_card_widget.cpp
-        src/controllers/sound_controller.cpp
         src/ui/custom_dialogs/more_info_dialog.cpp
 )
 
@@ -22,13 +21,11 @@ target_include_directories(
         pwd-core PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Multimedia MultimediaWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
 target_link_libraries(pwd-core PRIVATE
         Qt6::Core
         Qt6::Widgets
-        Qt6::Multimedia
-        Qt6::MultimediaWidgets
         sodium
         nlohmann_json::nlohmann_json
 )
@@ -75,6 +72,4 @@ target_link_libraries(password-manager PRIVATE
         pwd-core
         Qt6::Core
         Qt6::Widgets
-        Qt6::Multimedia
-        Qt6::MultimediaWidgets
 )

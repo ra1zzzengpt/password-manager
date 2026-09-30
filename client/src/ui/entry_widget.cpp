@@ -6,7 +6,7 @@
 #include <QUrl>
 #include <ui/entry_widget.hpp>
 
-EntryWidget::EntryWidget(MainController &controller, SoundController& sound_controller, QWidget* parent) : QWidget(parent), controller_(controller), sound_controller_(sound_controller)
+EntryWidget::EntryWidget(MainController &controller, QWidget* parent) : QWidget(parent), controller_(controller)
 {
     QVBoxLayout* layout = new QVBoxLayout(this);
 
@@ -31,13 +31,6 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
     hbox_button_layout->addWidget(delete_button);
     hbox_button_layout->addWidget(next_button);
 
-    connect(password_input, &QLineEdit::textChanged, this, [this]() {
-        if (auto res = sound_controller_.playSound(SoundType::Type); !res.has_value()) {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-    });
-
-
     connect(password_input,&QLineEdit::returnPressed,[=,this]()
     {
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
@@ -60,21 +53,15 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
 
     connect(delete_button,&QPushButton::clicked,[this]()
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value()) {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        QMessageBox* message_box = new QMessageBox();
-        message_box->setWindowTitle("Deletion confirmation");
-        message_box->setText("Are you sure you want to delete all password information?");
-        message_box->setInformativeText(" This action cannot be undone.");
-        message_box->setDetailedText("Use this button only if you do not need the information in the database or if you have forgotten your password., Use this button only if you do not need the information in the database or if you have forgotten the password.(We CANNOT recover the password).");
-        message_box->setIcon(QMessageBox::Warning);
-        message_box->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        message_box->setDefaultButton(QMessageBox::No);
-        if (auto res = sound_controller_.playSound(SoundType::Notification); !res.has_value()) {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
-        if (const int ans = message_box->exec(); ans == QMessageBox::Yes)
+        QMessageBox message_box{this};
+        message_box.setWindowTitle("Deletion confirmation");
+        message_box.setText("Are you sure you want to delete all password information?");
+        message_box.setInformativeText(" This action cannot be undone.");
+        message_box.setDetailedText("Use this button only if you do not need the information in the database or if you have forgotten your password., Use this button only if you do not need the information in the database or if you have forgotten the password.(We CANNOT recover the password).");
+        message_box.setIcon(QMessageBox::Warning);
+        message_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        message_box.setDefaultButton(QMessageBox::No);
+        if (const int ans = message_box.exec(); ans == QMessageBox::Yes)
         {
             if (const std::expected<void, err::Error> delete_res = controller_.deleteStorage(); !delete_res.has_value())
             {
@@ -83,14 +70,10 @@ EntryWidget::EntryWidget(MainController &controller, SoundController& sound_cont
             }
             QMessageBox::information(this,"Information","Successful.");
         }
-        message_box->deleteLater();
     });
 
     connect(next_button,&QPushButton::clicked,[=,this]()
     {
-        if (auto res = sound_controller_.playSound(SoundType::Click); !res.has_value()) {
-            QMessageBox::warning(this, "Warning", res.error().message.c_str());
-        }
         if (const std::expected<void, err::Error> set_result = controller_.setMasterPassword(password_input->text().toStdString()); !set_result.has_value())
         {
             QMessageBox::critical(this, "Error",set_result.error().message.c_str());

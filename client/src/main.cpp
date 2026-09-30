@@ -8,7 +8,6 @@
 
 #include "constants/paths.hpp"
 #include "controllers/configuration_controller.hpp"
-#include "controllers/sound_controller.hpp"
 #include "ui/window.hpp"
 
 namespace
@@ -83,11 +82,10 @@ int main(int argc, char* argv[])
         app.setStyleSheet(QString::fromUtf8(theme.readAll()));
 
         MainController mainController{*logs};
-        SoundController sound_controller{config.volume};
 
-        MainWindow* mainWindow = new MainWindow(mainController, sound_controller,
+        MainWindow mainWindow = MainWindow(mainController,
                                                configuration_controller, app);
-        mainWindow->show();
+        mainWindow.show();
         const int exit_code = QApplication::exec();
 
         logs->info_log("Application shutdown");
