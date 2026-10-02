@@ -74,7 +74,7 @@ QFrame(parent)
 
     createdAtLabel_ = new QLabel(this);
     createdAtLabel_->setText(controller_.getServices().at(id_).created_at.c_str());
-    rootLayout->addWidget(createdAtLabel_);
+    rootLayout->addWidget(createdAtLabel_,0,Qt::AlignRight);
 }
 
 void QServiceCardWidget::mousePressEvent(QMouseEvent* event)
