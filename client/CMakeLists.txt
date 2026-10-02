@@ -21,12 +21,11 @@ target_include_directories(
         pwd-core PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
 target_link_libraries(pwd-core PRIVATE
         Qt6::Core
         Qt6::Widgets
-        sodium
+        PkgConfig::SODIUM
         nlohmann_json::nlohmann_json
 )
 add_executable(password-manager src/main.cpp
