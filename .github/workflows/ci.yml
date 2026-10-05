@@ -20,18 +20,32 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
           version: "6.8.*"
+          cache: true
+
+      - name: Install nlohmann-json (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nlohmann-json3-dev
+
+      - name: Install nlohmann-json (macOS)
+        if: runner.os == 'macOS'
+        run: brew install nlohmann-json
+
+      - name: Install nlohmann-json (Windows)
+        if: runner.os == 'Windows'
+        run: vcpkg install nlohmann-json
 
       - name: Configure CMake
         run: >-
           cmake -S . -B build
           -DCMAKE_BUILD_TYPE=Release
-          -DSODIUM_DISABLE_TESTS=ON
 
       - name: Build
         run: cmake --build build --config Release --parallel 2
