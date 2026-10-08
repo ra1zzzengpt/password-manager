@@ -9,6 +9,9 @@
 struct Config
 {
     std::string theme = "dark"; // dark, white, nord or blue.
+    bool sync = true;
+    std::string host = "localhost";
+    std::string port = "8080";
 };
 
 inline void to_json(nlohmann::json& json, const Config& config)

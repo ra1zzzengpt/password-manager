@@ -16,3 +16,4 @@ pkg_check_modules(SODIUM REQUIRED IMPORTED_TARGET libsodium)
 # find_package(CURL REQUIRED) for server update
 
 add_subdirectory(client)
+add_subdirectory(server)

@@ -1,3 +1,5 @@
+find_package(OpenSSL REQUIRED)
+
 add_library(pwd-core STATIC
         src/controllers/configuration_controller.cpp
         src/controllers/main_controller.cpp
@@ -15,6 +17,10 @@ add_library(pwd-core STATIC
         src/ui/custom_list_widget.cpp
         src/ui/custom_widgets/service_card_widget.cpp
         src/ui/custom_dialogs/more_info_dialog.cpp
+        src/ui/first_entry_widget.cpp
+        src/ui/first_entry_widget.hpp
+        src/controllers/network_controller.hpp
+        src/controllers/network_controller.cpp
 )
 
 target_include_directories(
@@ -23,11 +29,15 @@ target_include_directories(
 )
 
 target_link_libraries(pwd-core PRIVATE
-        Qt6::Core
-        Qt6::Widgets
         PkgConfig::SODIUM
         nlohmann_json::nlohmann_json
+        OpenSSL::SSL
+        OpenSSL::Crypto
 )
+
+target_link_libraries(pwd-core PUBLIC Qt6::Core
+        Qt6::Widgets)
+
 add_executable(password-manager src/main.cpp
         src/utils/csv_parser.cpp
         src/utils/csv_parser.hpp)
@@ -65,10 +75,7 @@ qt_add_resources(password-manager theme
         assets/sounds/click.wav
         assets/sounds/notification.wav
         assets/sounds/type.wav
+        cert/ca.cert.pem
 )
 
-target_link_libraries(password-manager PRIVATE
-        pwd-core
-        Qt6::Core
-        Qt6::Widgets
-)
+target_link_libraries(password-manager PRIVATE pwd-core)
