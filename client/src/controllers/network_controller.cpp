@@ -1,40 +1,84 @@
 #include "network_controller.hpp"
 
+#include <expected>
+#include <nlohmann/json.hpp>
+#include <domain/error/error.hpp>
+
 NetworkController::NetworkController(std::string &host, std::string port) : host_(host), port_(port) {}
 
 template<typename T, typename N>
-http::response<T> NetworkController::request_response(const http::request<N> &request) {
+std::expected<http::response<T>,err::Error> NetworkController::request_response(const http::request<N> &request) {
     net::io_context io;
 
     ssl::context ctx(ssl::context_base::tls_client);
 
-    ctx.load_verify_file("/cert/ca.sert.pem");
+    try
+    {
+        ctx.load_verify_file("/cert/ca.sert.pem");
+    }
+    catch (...)
+    {
+        return std::unexpected{err::Error{.type = err::NetworkError::CantLoadSertificate,.message = "cant load sertificate"}};
+    }
 
     tcp::resolver resolver(io);
 
-    auto endpoints = resolver.resolve(host_,port_);
-
     beast::ssl_stream<beast::tcp_stream> stream(io,ctx);
 
-    beast::get_lowest_layer(stream).connect(endpoints);
+    try
+    {
+        auto endpoints = resolver.resolve(host_,port_);
 
-    stream.handshake(ssl::stream_base::client);
+        beast::get_lowest_layer(stream).connect(endpoints);
 
-    http::write(stream,request);
+        stream.handshake(ssl::stream_base::client);
+
+        http::write(stream,request);
+    } catch (...)
+    {
+        return std::unexpected{err::Error{.type = err::NetworkError::CantConnectToServer, .message = "cant connect to server"}};
+    }
 
     beast::flat_buffer buffer;
     http::response<T> response;
 
-    http::read(stream,buffer,response);
+    try {
+        http::read(stream,buffer,response);
 
-    beast::get_lowest_layer(stream).socket().shutdown(tcp::socket::shutdown_both);
+        beast::get_lowest_layer(stream).socket().shutdown(tcp::socket::shutdown_both);
 
-    stream.shutdown();
+        stream.shutdown();
+    } catch (...)
+    {
+        return std::unexpected{err::Error{.type = err::NetworkError::CantShutdownConnection,.message = "cant shutdown connection"}};
+    }
+
+    if (response.result() != http::status::ok)
+    {
+        // todo return on result
+    }
 
     return response;
 }
 
-void NetworkController::registration()
+std::expected<std::uint32_t, err::Error> NetworkController::registration(const std::string& password_hash)
 {
-    http::request<http::string_body>
+    http::request<http::string_body> request{http::verb::post,"/register",11};
+    request.set(http::field::host, host_);
+    request.set(http::field::user_agent, "password-manager");
+    request.set(http::field::content_type, "application/json");
+    request.set(http::field::accept, "application/json");
+    request.body() = nlohmann::json{{"hash",password_hash}};
+    request.prepare_payload();
+
+    if (auto res = request_response<http::string_body>(request); !res.has_value())
+    {
+        return std::unexpected{res.error()};
+    } else
+    {
+        nlohmann::json response_json = nlohmann::json{res.value().body()};
+        return response_json["id"].get<std::uint32_t>();
+    }
+
+
 }

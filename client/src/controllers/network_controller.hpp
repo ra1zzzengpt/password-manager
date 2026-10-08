@@ -4,11 +4,14 @@
 
 #ifndef PASSWORD_MANAGER_NETWORK_CONTROLLER_HPP
 #define PASSWORD_MANAGER_NETWORK_CONTROLLER_HPP
+#include <expected>
 #include <string>
 #include <boost/beast.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast/ssl.hpp>
+
+#include "domain/error/error.hpp"
 
 namespace http = boost::beast::http;
 namespace net = boost::asio;
@@ -25,7 +28,7 @@ public:
 
     void new_vault();
 
-    void registration();
+    std::expected<std::uint32_t,err::Error> registration(const std::string& password_hash);
 
     int login();
 
@@ -33,7 +36,7 @@ private:
     std::string host_;
     std::string port_;
 
-    template <typename T, typename N> http::response<T> request_response(const http::request<N>& request);
+    template <typename T, typename N> std::expected<http::response<T>,err::Error> request_response(const http::request<N>& request);
 };
 
 

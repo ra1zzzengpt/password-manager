@@ -42,4 +42,11 @@ namespace err
     {
         SoundNotExist,
     };
+
+    enum class NetworkError
+    {
+        CantLoadSertificate,
+        CantConnectToServer,
+        CantShutdownConnection,
+    };
 }
