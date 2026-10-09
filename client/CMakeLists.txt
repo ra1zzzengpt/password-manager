@@ -21,6 +21,12 @@ add_library(pwd-core STATIC
         src/ui/first_entry_widget.hpp
         src/controllers/network_controller.hpp
         src/controllers/network_controller.cpp
+        src/ui/custom_dialogs/config_filler_dialog.cpp
+        src/ui/custom_dialogs/config_filler_dialog.hpp
+        src/ui/network_entry_widget.cpp
+        src/ui/network_entry_widget.hpp
+        src/ui/vault_asker.cpp
+        src/ui/vault_asker.hpp
 )
 
 target_include_directories(

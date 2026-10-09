@@ -25,11 +25,8 @@ std::expected<Config, err::Error> ConfigurationController::load()
         }
         if (!exists)
         {
-            if (auto result = to_default(); !result)
-            {
-                return std::unexpected{result.error()};
-            }
-            return config_;
+            return std::unexpected{err::Error{err::StorageError::OpenFileFailed,
+                "Configuration file does not exist: " + path.string()}};
         }
 
         std::ifstream file(path);
@@ -138,6 +135,24 @@ std::expected<void, err::Error> ConfigurationController::setTheme(std::string th
 std::expected<void, err::Error> ConfigurationController::to_default()
 {
     return setConfig(Config{});
+}
+
+std::expected<void, err::Error> ConfigurationController::deleteConfig() const
+{
+    try
+    {
+        std::error_code ec;
+        std::filesystem::remove(configPath(), ec);
+        if (ec)
+        {
+            return std::unexpected{err::Error{err::StorageError::DeleteFailed, ec.message()}};
+        }
+        return {};
+    }
+    catch (const std::exception& e)
+    {
+        return std::unexpected{err::Error{err::StorageError::DeleteFailed, e.what()}};
+    }
 }
 
 std::filesystem::path ConfigurationController::configPath()

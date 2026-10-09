@@ -24,19 +24,23 @@ using tcp = net::ip::tcp;
 class NetworkController final
 {
 public:
-    NetworkController(std::string& host, std::string port);
+    NetworkController(std::string host, std::string port);
 
-    void new_vault();
+    std::expected<bool,err::Error> new_vault(const std::uint32_t& account_id, const std::uint32_t& password_hash, const std::uint32_t& vault_version, const std::vector<std::uint8_t>& vault);
 
-    std::expected<std::uint32_t,err::Error> registration(const std::string& password_hash);
+    std::expected<bool,err::Error> ask_vault(const std::uint32_t& account_id, const std::uint32_t& password_hash, const std::uint32_t& vault_version);
 
-    int login();
+    std::expected<std::vector<std::uint8_t>,err::Error> fetch_vault(const std::uint32_t& account_id, const std::uint32_t& password_hash, const std::uint32_t& vault_version);
+
+    std::expected<std::uint32_t,err::Error> registration(const std::uint32_t& password_hash);
+
+    std::expected<bool,err::Error> login(const std::uint32_t& account_id, const std::uint32_t& password_hash);
 
 private:
     std::string host_;
     std::string port_;
 
-    template <typename T, typename N> std::expected<http::response<T>,err::Error> request_response(const http::request<N>& request);
+    std::expected<http::response<http::string_body>,err::Error> request_response(const http::request<http::string_body>& request);
 };
 
 

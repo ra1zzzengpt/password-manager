@@ -10,6 +10,7 @@ namespace err
         RenameFailed,
         DeleteFailed,
         FileIsTooBig,
+        VaultVersionOverflow,
     };
 
     enum class SodiumError
@@ -47,6 +48,28 @@ namespace err
     {
         CantLoadSertificate,
         CantConnectToServer,
+        CantReadResponse,
         CantShutdownConnection,
+        InformationalResponse,
+        Redirection,
+        BadRequest,
+        Unauthorized,
+        Forbidden,
+        NotFound,
+        MethodNotAllowed,
+        RequestTimeout,
+        Conflict,
+        PayloadTooLarge,
+        UnsupportedMediaType,
+        UnprocessableEntity,
+        TooManyRequests,
+        ClientError,
+        InternalServerError,
+        NotImplemented,
+        BadGateway,
+        ServiceUnavailable,
+        GatewayTimeout,
+        ServerError,
+        UnexpectedHttpStatus,
     };
 }
