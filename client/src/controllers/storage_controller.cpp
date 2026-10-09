@@ -1,5 +1,6 @@
 #include "storage_controller.hpp"
 
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <filesystem>
 #include <constants/paths.hpp>
@@ -7,9 +8,12 @@
 #include <domain/error/error.hpp>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <logs/logs.hpp>
+#include <utility>
 
-StorageController::StorageController(Logs& logs) : sodium_(logs), logs_(logs)
+StorageController::StorageController(Logs& logs, std::atomic<std::uint32_t>& vault_version)
+    : sodium_(logs), logs_(logs), vault_version_(vault_version)
 {
     logs_.info_log("Storage controller initialized");
 }
@@ -23,6 +27,17 @@ std::uint32_t StorageController::takeNextId()
 std::expected<void, err::Error> StorageController::save()
 {
     logs_.info_log("Starting encrypted storage save");
+    const std::uint32_t current_vault_version = vault_version_.load();
+    if (current_vault_version == std::numeric_limits<std::uint32_t>::max())
+    {
+        logs_.error_log("Vault version overflow");
+        return std::unexpected{err::Error{
+            err::StorageError::VaultVersionOverflow,
+            "Vault version reached its maximum value",
+        }};
+    }
+
+    const std::uint32_t next_vault_version = current_vault_version + 1;
     const std::filesystem::path path{cnt::savePath()};
     const std::filesystem::path temp_path{path.string() + ".temp"};
     if (!std::filesystem::exists(path))
@@ -45,8 +60,11 @@ std::expected<void, err::Error> StorageController::save()
         std::filesystem::remove(temp_path);
         return std::unexpected{err::Error{err::StorageError::OpenFileFailed, "Can't open file at: " + path.string()}};
     }
-    const std::expected<crypto::SodiumInfo, err::Error> encrypted_result = sodium_.encrypt(
-        nlohmann::json(services_).dump());
+    const nlohmann::json vault = {
+        {"vault_version", next_vault_version},
+        {"services", services_},
+    };
+    const std::expected<crypto::SodiumInfo, err::Error> encrypted_result = sodium_.encrypt(vault.dump());
     if (!encrypted_result.has_value())
     {
         logs_.error_log("Storage save encryption failed");
@@ -70,6 +88,7 @@ std::expected<void, err::Error> StorageController::save()
         logs_.error_log("Replacing storage file failed");
         return std::unexpected{err::Error{err::StorageError::RenameFailed, e.what()}};
     }
+    vault_version_ = next_vault_version;
     logs_.info_log("Encrypted storage saved");
     return {};
 }
@@ -121,18 +140,38 @@ std::expected<void, err::Error> StorageController::load()
         }
         try
         {
-            services_ = nlohmann::json::parse(decrypt_result.value());
-            // bug with emplace fixed
-            id_ = id_ + services_.size();
+            const nlohmann::json vault = nlohmann::json::parse(decrypt_result.value());
+            std::uint32_t loaded_vault_version;
+            std::unordered_map<std::uint32_t, Service> loaded_services;
+            if (vault.is_object() && vault.contains("vault_version") && vault.contains("services"))
+            {
+                loaded_vault_version = vault.at("vault_version").get<std::uint32_t>();
+                loaded_services = vault.at("services").get<std::unordered_map<std::uint32_t, Service>>();
+            }
+            else
+            {
+                loaded_vault_version = 0;
+                loaded_services = vault.get<std::unordered_map<std::uint32_t, Service>>();
+            }
+
+            vault_version_ = loaded_vault_version;
+            services_ = std::move(loaded_services);
+            id_ = 0;
+            for (const auto& service : services_)
+                id_ = std::max(id_, service.first);
         } catch (...)
         {
             logs_.error_log("Decrypted storage deserialization failed");
             return std::unexpected{err::Error{err::StorageError::ParseFailed, "Can't deserialize storage data."}};
         }
-    } else
+        return {};
+    }
+    else
     {
         logs_.info_log("Storage file is missing or empty; initializing new storage");
         services_ = std::unordered_map<std::uint32_t, Service>{};
+        id_ = 0;
+        vault_version_ = 0;
     }
     return save();
 }
@@ -143,6 +182,9 @@ std::expected<void, err::Error> StorageController::del()
     const std::filesystem::path path{cnt::savePath()};
     if (!std::filesystem::exists(path))
     {
+        services_.clear();
+        id_ = 0;
+        vault_version_ = 0;
         logs_.info_log("Storage deletion skipped because file does not exist");
         return {};
     }
@@ -154,7 +196,56 @@ std::expected<void, err::Error> StorageController::del()
         logs_.error_log("Storage file deletion failed");
         return std::unexpected{err::Error{err::StorageError::DeleteFailed,e.what()}};
     }
+    services_.clear();
+    id_ = 0;
+    vault_version_ = 0;
     logs_.info_log("Encrypted storage deleted");
+    return {};
+}
+
+std::expected<std::vector<std::uint8_t>, err::Error> StorageController::encryptedVault() const
+{
+    std::ifstream file{cnt::savePath(), std::ios::binary};
+    if (!file)
+        return std::unexpected{err::Error{err::StorageError::OpenFileFailed, "Can't open encrypted vault"}};
+    std::vector<std::uint8_t> data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return data;
+}
+
+std::expected<void, err::Error> StorageController::replaceVault(const std::vector<std::uint8_t>& data)
+{
+    const auto imported = crypto::import(data);
+    if (!imported)
+        return std::unexpected{imported.error()};
+    const auto decrypted = sodium_.decrypt(imported.value());
+    if (!decrypted)
+        return std::unexpected{decrypted.error()};
+
+    std::uint32_t loaded_version;
+    std::unordered_map<std::uint32_t, Service> loaded_services;
+    try
+    {
+        const auto vault = nlohmann::json::parse(decrypted.value());
+        loaded_version = vault.at("vault_version").get<std::uint32_t>();
+        loaded_services = vault.at("services").get<std::unordered_map<std::uint32_t, Service>>();
+    }
+    catch (...)
+    {
+        return std::unexpected{err::Error{err::StorageError::ParseFailed, "Can't deserialize fetched vault"}};
+    }
+
+    std::ofstream file{cnt::savePath(), std::ios::binary | std::ios::trunc};
+    if (!file)
+        return std::unexpected{err::Error{err::StorageError::OpenFileFailed, "Can't save fetched vault"}};
+    file.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
+    if (!file)
+        return std::unexpected{err::Error{err::StorageError::FileStreamError, "Can't save fetched vault"}};
+
+    services_ = std::move(loaded_services);
+    vault_version_ = loaded_version;
+    id_ = 0;
+    for (const auto& service : services_)
+        id_ = std::max(id_, service.first);
     return {};
 }
 

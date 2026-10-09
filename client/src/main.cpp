@@ -8,10 +8,23 @@
 
 #include "constants/paths.hpp"
 #include "controllers/configuration_controller.hpp"
+#include "ui/custom_dialogs/config_filler_dialog.hpp"
 #include "ui/window.hpp"
 
 namespace
 {
+    void applyTheme(QApplication& app, const QString& theme_name)
+    {
+        const QString theme_path = ":/assets/" + theme_name + "_theme.qss";
+        QFile theme(theme_path);
+        if (!theme.open(QFile::ReadOnly))
+        {
+            throw err::Error{err::StorageError::OpenFileFailed,
+                "Can't open theme resource: " + theme_path.toStdString()};
+        }
+        app.setStyleSheet(QString::fromUtf8(theme.readAll()));
+    }
+
     void showCriticalError(const QString& message)
     {
         QMessageBox critical_message_box;
@@ -33,55 +46,21 @@ int main(int argc, char* argv[])
         logs->info_log("Application startup");
 
         ConfigurationController configuration_controller;
-        QString load_error;
-        bool loaded = false;
-        try
+        if (const auto result = configuration_controller.load(); !result)
         {
-            if (auto result = configuration_controller.load(); result)
-            {
-                loaded = true;
-            } else
-            {
-                load_error = QString::fromStdString(result.error().message);
-            }
-        } catch (const err::Error& e)
-        {
-            load_error = QString::fromStdString(e.message);
-        } catch (const std::exception& e)
-        {
-            load_error = QString::fromUtf8(e.what());
-        } catch (...)
-        {
-            load_error = "Unknown configuration error.";
-        }
-
-        if (!loaded)
-        {
-            const auto answer = QMessageBox::question(nullptr, "Configuration error",
-                "Could not load configuration: " + load_error + "\nOverwrite it with defaults?",
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-            if (answer != QMessageBox::Yes)
+            applyTheme(app, "dark");
+            QConfigFillerDialog config_dialog{configuration_controller};
+            if (config_dialog.exec() != QDialog::Accepted)
             {
                 logs->info_log("Application shutdown after configuration load failure");
                 return EXIT_FAILURE;
             }
-            if (auto result = configuration_controller.to_default(); !result)
-            {
-                throw result.error();
-            }
         }
 
         const auto& config = configuration_controller.config();
-        const QString theme_path = ":/assets/" + QString::fromStdString(config.theme) + "_theme.qss";
-        QFile theme(theme_path);
-        if (!theme.open(QFile::ReadOnly))
-        {
-            throw err::Error{err::StorageError::OpenFileFailed,
-                "Can't open theme resource: " + theme_path.toStdString()};
-        }
-        app.setStyleSheet(QString::fromUtf8(theme.readAll()));
+        applyTheme(app, QString::fromStdString(config.theme));
 
-        MainController mainController{*logs};
+        MainController mainController{config.host, config.port, *logs};
 
         MainWindow mainWindow = MainWindow(mainController,
                                                configuration_controller, app);

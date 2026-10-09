@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <expected>
 #include <qstring.h>
 #include <vector>
@@ -16,7 +17,7 @@ class StorageController final
 {
 public:
     // ----------------- OBJ --------------------------
-    explicit StorageController(Logs& logs);
+    explicit StorageController(Logs& logs, std::atomic<std::uint32_t>& vault_version);
 
     ~StorageController() = default;
 
@@ -36,6 +37,10 @@ public:
     std::expected<void, err::Error> save();
 
     std::expected<void, err::Error> del();
+
+    std::expected<std::vector<std::uint8_t>, err::Error> encryptedVault() const;
+
+    std::expected<void, err::Error> replaceVault(const std::vector<std::uint8_t>& data);
 
     // --------------- SERVICES ----------------------
     std::expected<std::uint32_t, err::Error> addService(const Service& service);
@@ -60,5 +65,6 @@ private:
     std::unordered_map<std::uint32_t,Service> services_;
     crypto::Sodium sodium_;
     Logs& logs_;
+    std::atomic<std::uint32_t>& vault_version_;
     static inline std::uint32_t id_;
 };

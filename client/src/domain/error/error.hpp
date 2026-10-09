@@ -7,7 +7,7 @@ namespace err
 {
     struct Error
     {
-        std::variant<StorageError,SoundError,SodiumError,TransformError,SettingsError,LogsError> type;
+        std::variant<StorageError,SoundError,SodiumError,TransformError,SettingsError,LogsError,NetworkError> type;
         std::string message;
     };
 }
